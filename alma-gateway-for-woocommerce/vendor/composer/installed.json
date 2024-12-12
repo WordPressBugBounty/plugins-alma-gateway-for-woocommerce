@@ -2,17 +2,17 @@
     "packages": [
         {
             "name": "alma/alma-php-client",
-            "version": "2.2.0",
-            "version_normalized": "2.2.0.0",
+            "version": "2.4.0",
+            "version_normalized": "2.4.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/alma/alma-php-client.git",
-                "reference": "d677ccff0557b8d68d9dadd80da62e8326ca3fa5"
+                "reference": "4a0a710aa8c63f739c8e32017ea9527382db6e68"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/alma/alma-php-client/zipball/d677ccff0557b8d68d9dadd80da62e8326ca3fa5",
-                "reference": "d677ccff0557b8d68d9dadd80da62e8326ca3fa5",
+                "url": "https://api.github.com/repos/alma/alma-php-client/zipball/4a0a710aa8c63f739c8e32017ea9527382db6e68",
+                "reference": "4a0a710aa8c63f739c8e32017ea9527382db6e68",
                 "shasum": ""
             },
             "require": {
@@ -31,7 +31,7 @@
                 "roave/security-advisories": "@dev",
                 "squizlabs/php_codesniffer": "^3.3"
             },
-            "time": "2024-09-05T11:58:16+00:00",
+            "time": "2024-12-09T14:03:28+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -52,7 +52,7 @@
             "description": "PHP API client for the Alma payments API",
             "support": {
                 "issues": "https://github.com/alma/alma-php-client/issues",
-                "source": "https://github.com/alma/alma-php-client/tree/v2.2.0"
+                "source": "https://github.com/alma/alma-php-client/tree/v2.4.0"
             },
             "install-path": "../alma/alma-php-client"
         },
