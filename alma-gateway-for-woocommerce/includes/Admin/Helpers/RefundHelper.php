@@ -192,6 +192,19 @@ class RefundHelper {
 	}
 
 	/**
+	 * Adds a refund error note to an order + a notice
+	 *
+	 * @param \WC_Order $wc_order The order where to add a note & notice.
+	 * @param string    $message The message.
+	 *
+	 * @return void
+	 * @see add_order_note()
+	 */
+	public function add_error_note( $wc_order, $message ) {
+		$this->add_order_note( $wc_order, ConstantsHelper::ERROR, $message );
+	}
+
+	/**
 	 * Does the order has a refundable status.
 	 *
 	 * @param \WC_Order $wc_order The order.
@@ -210,19 +223,6 @@ class RefundHelper {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Adds a refund error note to an order + a notice
-	 *
-	 * @param \WC_Order $wc_order The order where to add a note & notice.
-	 * @param string    $message The message.
-	 *
-	 * @return void
-	 * @see add_order_note()
-	 */
-	public function add_error_note( $wc_order, $message ) {
-		$this->add_order_note( $wc_order, ConstantsHelper::ERROR, $message );
 	}
 
 	/**

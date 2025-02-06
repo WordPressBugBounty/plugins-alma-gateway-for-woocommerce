@@ -250,12 +250,6 @@ class CartHelper {
 				function ( $plan ) {
 					unset( $plan['max_amount'] );
 					unset( $plan['min_amount'] );
-					if ( isset( $plan['deferred_months'] ) && 0 === $plan['deferred_months'] ) {
-						unset( $plan['deferred_months'] );
-					}
-					if ( isset( $plan['deferred_days'] ) && 0 === $plan['deferred_days'] ) {
-						unset( $plan['deferred_days'] );
-					}
 
 					return $plan;
 				},

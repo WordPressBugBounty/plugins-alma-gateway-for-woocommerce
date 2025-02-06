@@ -58,16 +58,21 @@ class ConstantsHelper {
 	const ALMA_LOGO_PATH                                = 'images/alma_logo.svg';
 	const ALMA_SHORT_LOGO_PATH                          = 'images/alma_short_logo.svg';
 	const ALMA_PATH_CHECKOUT_JS                         = 'js/alma-checkout.js';
-	const ALMA_PATH_CHECKOUT_BLOCK_JS                   = 'alma-checkout-blocks.js';
-	const ALMA_PATH_CHECKOUT_BLOCK_CSS                  = 'alma-checkout-blocks.css';
-	const ALMA_PATH_CHECKOUT_BLOCK_REACT_COMPONENTS_CSS = 'style-alma-checkout-blocks.css';
-	const ALMA_PATH_CHECKOUT_BLOCK_PHP                  = 'alma-checkout-blocks.asset.php';
+	const ALMA_PATH_CHECKOUT_BLOCK_JS                   = 'alma-checkout-block/alma-checkout-blocks.js';
+	const ALMA_PATH_CHECKOUT_BLOCK_CSS                  = 'alma-checkout-block/alma-checkout-blocks.css';
+	const ALMA_PATH_CHECKOUT_BLOCK_REACT_COMPONENTS_CSS = 'alma-checkout-block/style-alma-checkout-blocks.css';
+	const ALMA_PATH_CHECKOUT_BLOCK_PHP                  = 'alma-checkout-block/alma-checkout-blocks.asset.php';
 	const ALMA_PATH_CHECKOUT_IN_PAGE_JS                 = 'js/alma-checkout-in-page.js';
 	const ALMA_PATH_CHECKOUT_CDN_IN_PAGE_JS             = 'https://cdn.jsdelivr.net/npm/@alma/in-page@2.x/dist/index.umd.js';
 	const ALMA_PATH_CHECKOUT_CSS                        = 'css/alma-checkout.css';
-	const PAY_IN_INSTALLMENTS                           = 'Pay in installments';
-	const PAY_LATER                                     = 'Pay later';
-	const PAY_BY_FINANCING                              = 'Pay with financing';
+	const ALMA_PATH_WIDGET_BLOCK_PHP                    = 'alma-widget-block/alma-widget-block.asset.php';
+	const ALMA_PATH_WIDGET_BLOCK_CSS                    = 'alma-widget-block/alma-widget-block.css';
+	const ALMA_PATH_WIDGET_BLOCK_REACT_COMPONENTS_CSS   = 'alma-widget-block/style-alma-widget-block.css';
+	const ALMA_PATH_WIDGET_BLOCK_JS                     = 'alma-widget-block/alma-widget-block.js';
+
+	const PAY_IN_INSTALLMENTS = 'Pay in installments';
+	const PAY_LATER           = 'Pay later';
+	const PAY_BY_FINANCING    = 'Pay with financing';
 
 	const PAY_NOW = 'Pay by credit card';
 

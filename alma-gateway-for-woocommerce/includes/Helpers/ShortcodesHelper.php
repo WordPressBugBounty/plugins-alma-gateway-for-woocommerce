@@ -21,8 +21,6 @@ use Alma\Woocommerce\Handlers\ProductHandler;
  */
 class ShortcodesHelper {
 
-
-
 	/**
 	 * Init cart widget shortcode
 	 *
@@ -160,5 +158,4 @@ class ShortcodesHelper {
 
 		return $this->render( ConstantsHelper::PRODUCT_SHORTCODE_TAG, $atts, ob_get_clean(), $content );
 	}
-
 }

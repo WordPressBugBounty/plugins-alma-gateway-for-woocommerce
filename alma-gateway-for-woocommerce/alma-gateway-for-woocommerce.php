@@ -3,7 +3,7 @@
  * Plugin Name: Alma - Pay in installments or later for WooCommerce
  * Plugin URI: https://docs.almapay.com/docs/woocommerce
  * Description: Install Alma and boost your sales! It's simple and guaranteed, your cash flow is secured. 0 commitment, 0 subscription, 0 risk.
- * Version: 5.8.1
+ * Version: 5.9.0
  * Author: Alma
  * Author URI: https://almapay.com
  * License: GNU General Public License v3.0
@@ -33,12 +33,14 @@
  * along with Alma Payment Gateway for WooCommerce. If not, see https://www.gnu.org/licenses/gpl-3.0.html.
  */
 
+use Alma\Woocommerce\Blocks\AlmaWidgetBlock;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
 if ( ! defined( 'ALMA_VERSION' ) ) {
-	define( 'ALMA_VERSION', '5.8.1' );
+	define( 'ALMA_VERSION', '5.9.0' );
 }
 if ( ! defined( 'ALMA_PLUGIN_FILE' ) ) {
 	define( 'ALMA_PLUGIN_FILE', __FILE__ );
@@ -96,16 +98,38 @@ add_action(
 add_action(
 	'before_woocommerce_init',
 	function () {
-		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+		if ( class_exists( Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
 			/**
 			 * Skip WC class check.
 			 *
 			 * @psalm-suppress UndefinedClass
 			 */
-			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+			/** @noinspection PhpFullyQualifiedNameUsageInspection */
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );// phpcs:ignore
+			/** @noinspection PhpFullyQualifiedNameUsageInspection */
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );// phpcs:ignore
 		}
 	}
 );
 
+add_action(
+	'init',
+	function () {
+		register_block_type_from_metadata( __DIR__ . '/build/alma-widget-block' );
+	}
+);
 
-
+/**
+ * Register the Alma widget block.
+ */
+add_action(
+	'woocommerce_blocks_loaded',
+	function () {
+		add_action(
+			'woocommerce_blocks_cart_block_registration',
+			function ( $integration_registry ) {
+				$integration_registry->register( new AlmaWidgetBlock() );
+			}
+		);
+	}
+);

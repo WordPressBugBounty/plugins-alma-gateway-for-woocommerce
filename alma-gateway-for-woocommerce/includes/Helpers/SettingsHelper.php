@@ -81,6 +81,7 @@ class SettingsHelper {
 		$this->assets_helper               = $assets_helper;
 		$this->plugin_factory              = $plugin_factory;
 	}
+
 	/**
 	 * Get default settings.
 	 *
@@ -124,6 +125,8 @@ class SettingsHelper {
 			'description_blocks_alma_pay_later'          => $this->default_payment_description(),
 			'title_blocks_alma_pnx_plus_4'               => $this->default_pnx_plus_4_title(),
 			'description_blocks_alma_pnx_plus_4'         => $this->default_payment_description(),
+			'title_blocks_alma_in_page_pnx_plus_4'       => $this->default_pnx_plus_4_title(),
+			'description_blocks_alma_in_page_pnx_plus_4' => $this->default_payment_description(),
 			'display_cart_eligibility'                   => 'yes',
 			'display_product_eligibility'                => 'yes',
 			'variable_product_price_query_selector'      => $this->default_variable_price_selector(),
@@ -138,7 +141,6 @@ class SettingsHelper {
 			'debug'                                      => 'yes',
 			'keys_validity'                              => 'no',
 			'display_in_page'                            => 'no',
-			'use_blocks_template'                        => 'no',
 		);
 	}
 
@@ -152,9 +154,22 @@ class SettingsHelper {
 		if ( $this->internationalization_helper->is_site_multilingual() ) {
 			return ConstantsHelper::PAY_IN_INSTALLMENTS;
 		}
+
 		return __( 'Pay in installments', 'alma-gateway-for-woocommerce' );
 	}
 
+	/**
+	 * Gets the default description for all payment methods (pnx, pnx+4, pay later).
+	 *
+	 * @return string
+	 */
+	public function default_payment_description() {
+		if ( $this->internationalization_helper->is_site_multilingual() ) {
+			return 'Fast and secure payment by credit card';
+		}
+
+		return __( 'Fast and secure payment by credit card', 'alma-gateway-for-woocommerce' );
+	}
 
 	/**
 	 * Gets the default title for pnx payment method.
@@ -165,6 +180,7 @@ class SettingsHelper {
 		if ( $this->internationalization_helper->is_site_multilingual() ) {
 			return ConstantsHelper::PAY_NOW;
 		}
+
 		return __( 'Pay by credit card', 'alma-gateway-for-woocommerce' );
 	}
 
@@ -177,21 +193,9 @@ class SettingsHelper {
 		if ( $this->internationalization_helper->is_site_multilingual() ) {
 			return 'Fast and secured payments';
 		}
+
 		return __( 'Fast and secured payments', 'alma-gateway-for-woocommerce' );
 	}
-
-	/**
-	 * Gets the default description for all payment methods (pnx, pnx+4, pay later).
-	 *
-	 * @return string
-	 */
-	public function default_payment_description() {
-		if ( $this->internationalization_helper->is_site_multilingual() ) {
-			return 'Fast and secure payment by credit card';
-		}
-		return __( 'Fast and secure payment by credit card', 'alma-gateway-for-woocommerce' );
-	}
-
 
 	/**
 	 * Gets the default title for pay later payment method.
@@ -202,6 +206,7 @@ class SettingsHelper {
 		if ( $this->internationalization_helper->is_site_multilingual() ) {
 			return ConstantsHelper::PAY_LATER;
 		}
+
 		return __( 'Pay later', 'alma-gateway-for-woocommerce' );
 	}
 
@@ -214,6 +219,7 @@ class SettingsHelper {
 		if ( $this->internationalization_helper->is_site_multilingual() ) {
 			return ConstantsHelper::PAY_BY_FINANCING;
 		}
+
 		return __( 'Pay with financing', 'alma-gateway-for-woocommerce' );
 	}
 
@@ -256,6 +262,7 @@ class SettingsHelper {
 		if ( $this->internationalization_helper->is_site_multilingual() ) {
 			return 'Some products cannot be paid with monthly or deferred installments';
 		}
+
 		return __( 'Some products cannot be paid with monthly or deferred installments', 'alma-gateway-for-woocommerce' );
 	}
 
