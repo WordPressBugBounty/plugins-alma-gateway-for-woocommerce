@@ -62,10 +62,11 @@
       "__experimentalTextDecoration": true,
       "__experimentalLetterSpacing": true,
       "__experimentalDefaultControls": {
-        "fontSize": true,
-        "fontAppearance": true,
-        "textTransform": true
+        "fontSize": true
       }
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "style": "wp-block-post-title"

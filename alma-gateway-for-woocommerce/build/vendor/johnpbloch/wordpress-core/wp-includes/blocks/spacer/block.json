@@ -28,6 +28,9 @@
       "__experimentalDefaultControls": {
         "margin": true
       }
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "editorStyle": "wp-block-spacer-editor",

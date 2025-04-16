@@ -7,11 +7,18 @@
   "parent": [
     "core/query-pagination"
   ],
-  "description": "Displays a list of page numbers for pagination",
+  "description": "Displays a list of page numbers for pagination.",
   "textdomain": "default",
+  "attributes": {
+    "midSize": {
+      "type": "number",
+      "default": 2
+    }
+  },
   "usesContext": [
     "queryId",
-    "query"
+    "query",
+    "enhancedPagination"
   ],
   "supports": {
     "reusable": false,
@@ -35,6 +42,9 @@
       "__experimentalDefaultControls": {
         "fontSize": true
       }
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "editorStyle": "wp-block-query-pagination-numbers-editor"

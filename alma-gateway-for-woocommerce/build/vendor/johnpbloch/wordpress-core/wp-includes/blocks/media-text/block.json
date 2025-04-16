@@ -106,6 +106,7 @@
     "html": false,
     "color": {
       "gradients": true,
+      "heading": true,
       "link": true,
       "__experimentalDefaultControls": {
         "background": true,
@@ -128,6 +129,9 @@
       "__experimentalDefaultControls": {
         "fontSize": true
       }
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "editorStyle": "wp-block-media-text-editor",

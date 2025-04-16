@@ -18,7 +18,8 @@
     "queryId",
     "query",
     "paginationArrow",
-    "showLabel"
+    "showLabel",
+    "enhancedPagination"
   ],
   "supports": {
     "reusable": false,
@@ -42,6 +43,9 @@
       "__experimentalDefaultControls": {
         "fontSize": true
       }
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   }
 }

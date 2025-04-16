@@ -12,10 +12,9 @@
   "textdomain": "default",
   "attributes": {
     "content": {
-      "type": "string",
-      "source": "html",
+      "type": "rich-text",
+      "source": "rich-text",
       "selector": "pre",
-      "default": "",
       "__unstablePreserveWhiteSpace": true,
       "__experimentalRole": "content"
     },
@@ -43,8 +42,7 @@
       "__experimentalTextTransform": true,
       "__experimentalTextDecoration": true,
       "__experimentalDefaultControls": {
-        "fontSize": true,
-        "fontAppearance": true
+        "fontSize": true
       }
     },
     "spacing": {
@@ -60,6 +58,9 @@
       "width": true,
       "color": true,
       "style": true
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "style": "wp-block-verse",

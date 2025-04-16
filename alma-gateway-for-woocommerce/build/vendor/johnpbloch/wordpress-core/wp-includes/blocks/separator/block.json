@@ -39,6 +39,9 @@
         "top",
         "bottom"
       ]
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "styles": [

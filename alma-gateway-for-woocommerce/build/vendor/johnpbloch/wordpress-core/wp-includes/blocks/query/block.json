@@ -34,12 +34,17 @@
     },
     "namespace": {
       "type": "string"
+    },
+    "enhancedPagination": {
+      "type": "boolean",
+      "default": false
     }
   },
   "providesContext": {
     "queryId": "queryId",
     "query": "query",
-    "displayLayout": "displayLayout"
+    "displayLayout": "displayLayout",
+    "enhancedPagination": "enhancedPagination"
   },
   "supports": {
     "align": [
@@ -47,7 +52,8 @@
       "full"
     ],
     "html": false,
-    "layout": true
+    "layout": true,
+    "interactivity": true
   },
   "editorStyle": "wp-block-query-editor"
 }

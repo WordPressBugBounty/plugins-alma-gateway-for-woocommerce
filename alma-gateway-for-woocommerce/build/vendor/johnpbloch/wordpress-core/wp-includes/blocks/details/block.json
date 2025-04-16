@@ -6,9 +6,10 @@
   "category": "text",
   "description": "Hide and show additional content.",
   "keywords": [
-    "disclosure",
+    "accordion",
     "summary",
-    "hide"
+    "toggle",
+    "disclosure"
   ],
   "textdomain": "default",
   "attributes": {
@@ -17,7 +18,9 @@
       "default": false
     },
     "summary": {
-      "type": "string"
+      "type": "rich-text",
+      "source": "rich-text",
+      "selector": "summary"
     }
   },
   "supports": {
@@ -42,6 +45,7 @@
     "spacing": {
       "margin": true,
       "padding": true,
+      "blockGap": true,
       "__experimentalDefaultControls": {
         "margin": false,
         "padding": false
@@ -59,6 +63,12 @@
       "__experimentalDefaultControls": {
         "fontSize": true
       }
+    },
+    "layout": {
+      "allowEditing": false
+    },
+    "interactivity": {
+      "clientNavigation": true
     }
   },
   "editorStyle": "wp-block-details-editor",
