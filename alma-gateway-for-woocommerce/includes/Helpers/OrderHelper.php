@@ -28,6 +28,7 @@ use Alma\Woocommerce\Factories\VersionFactory;
 use Alma\Woocommerce\Gateways\Standard\StandardGateway;
 use Alma\Woocommerce\Services\AlmaBusinessEventService;
 use Alma\Woocommerce\Services\CheckoutService;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Exception;
 use WC_Data_Exception;
 use WC_Order;
@@ -257,12 +258,13 @@ class OrderHelper {
 				&& ! empty( $_POST['fields'] ) // phpcs:ignore WordPress.Security.NonceVerification
 			) {
 
-				list( $payment_id, $order_id ) = $this->create_inpage_order( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification
+				list( $payment_id, $order_id, $order_key ) = $this->create_inpage_order( $_POST ); // phpcs:ignore WordPress.Security.NonceVerification
 
 				wp_send_json_success(
 					array(
 						'payment_id' => $payment_id,
 						'order_id'   => $order_id,
+						'order_key'  => $order_key,
 					)
 				);
 			}
@@ -314,6 +316,7 @@ class OrderHelper {
 		return array(
 			$payment->id,
 			$order->get_id(),
+			$order->get_order_key(),
 		);
 	}
 
@@ -351,12 +354,40 @@ class OrderHelper {
 	 */
 	public function alma_cancel_order_in_page() {
 		try {
-			$order_id     = sanitize_text_field( $_POST['order_id'] ); // phpcs:ignore WordPress.Security.NonceVerification
+			// Verification of nonce
+			// If Payment method is set, we are in blocks context.
+			if ( isset( $_POST['payment_method'] ) ) {
+				if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'alma_checkout_nonce' . $_POST['payment_method'] ) ) {
+					wp_send_json_error( 'Blocks: Invalid security token', 403 );
+				}
+			} elseif ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), 'alma_cancel_order_in_page' ) ) {
+					wp_send_json_error( 'Invalid security token', 403 );
+			}
+
+			$order_id     = sanitize_text_field( $_POST['order_id'] );
 			$order_helper = new OrderHelper();
 			$order        = $order_helper->get_order( $order_id );
-			$order->update_status( 'cancelled', 'Cancelled by customer' );
-			if ($this->alma_settings->is_removed_order_on_close_inpage()) {
-				$order->delete( true );
+
+			if (is_user_logged_in()) {
+				if (
+					(int) $order->get_user_id() !== get_current_user_id() &&
+					! current_user_can( 'manage_woocommerce' )
+				) {
+					wp_send_json_error( 'Logged: Forbidden to cancel the order', 403 );
+				}
+			} else {
+				$order_key = isset( $_POST['order_key'] ) ? sanitize_text_field( wp_unslash( $_POST['order_key'] ) ) : '';
+
+				if ( ! hash_equals( $order->get_order_key(), $order_key )) {
+					wp_send_json_error( 'Not Logged: Forbidden to cancel the order', 403 );
+				}
+			}
+
+			if (
+				strpos( $order->get_payment_method(), 'alma' ) !== false &&
+				in_array( $order->get_status(), array( OrderStatus::PENDING, OrderStatus::DRAFT ) )
+			) {
+				$order->update_status( 'cancelled', 'Cancelled by customer' );
 			}
 			wp_send_json_success();
 		} catch ( Exception $e ) {
