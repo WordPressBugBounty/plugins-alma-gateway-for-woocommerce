@@ -1,7 +1,7 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => '6.0.0-alpha',
-        'version' => '6.0.0.0-alpha',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -11,12 +11,30 @@
     ),
     'versions' => array(
         'alma/alma-gateway-for-woocommerce' => array(
-            'pretty_version' => '6.0.0-alpha',
-            'version' => '6.0.0.0-alpha',
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'reference' => null,
+            'dev_requirement' => false,
+        ),
+        'alma/alma-php-client' => array(
+            'pretty_version' => '2.6.1',
+            'version' => '2.6.1.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../alma/alma-php-client',
+            'aliases' => array(),
+            'reference' => 'f63c7fd448b6fc403da9c055d87296e4c723a413',
+            'dev_requirement' => false,
+        ),
+        'psr/log' => array(
+            'pretty_version' => '1.1.4',
+            'version' => '1.1.4.0',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../psr/log',
+            'aliases' => array(),
+            'reference' => 'd49695b909c3b7628b6289db5479a1c204601f11',
             'dev_requirement' => false,
         ),
     ),
