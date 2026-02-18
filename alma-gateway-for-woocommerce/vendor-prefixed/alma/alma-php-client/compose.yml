@@ -1,0 +1,16 @@
+services:
+  php:
+    user: ${UID:-1000}:${GID:-1000}
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        PHP_VERSION: ${PHP_VERSION}
+        COMPOSER_VERSION: ${COMPOSER_VERSION:-2}
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/app
+      - /app/vendor
+    environment:
+      XDEBUG_MODE: coverage
