@@ -35,7 +35,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'b51ac707cfa420b7bfd4e4d5e510ba8008e822b4',
+      'reference' => 'fb92d95f80a9da51bf8f2a5b26d8e8ea3b6d99ed',
       'dev_requirement' => false,
     ),
     'guzzlehttp/promises' => 
@@ -47,7 +47,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '481557b130ef3790cf82b713667b43030dc9c957',
+      'reference' => '74c1b7186ecda8058c8958a1b2d3e8ef4419a84e',
       'dev_requirement' => false,
     ),
     'guzzlehttp/psr7' => 
@@ -59,7 +59,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => '21dc724a0583619cd1652f673303492272778051',
+      'reference' => '27b6714cf2e71cfcc49718eb81ac711103f08218',
       'dev_requirement' => false,
     ),
     'level-2/dice' => 
