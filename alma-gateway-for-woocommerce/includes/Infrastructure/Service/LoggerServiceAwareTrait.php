@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Plugin;
-use Alma\Vendor\Psr\Log\LoggerInterface;
+use Psr\Log\LoggerInterface;
 
 trait LoggerServiceAwareTrait {
 

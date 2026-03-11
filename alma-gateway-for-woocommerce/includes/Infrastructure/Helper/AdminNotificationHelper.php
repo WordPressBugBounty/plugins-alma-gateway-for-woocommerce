@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\AdminNotificationHelperInterface;
+use Alma\Plugin\Infrastructure\Helper\AdminNotificationHelperInterface;
 
 class AdminNotificationHelper implements AdminNotificationHelperInterface {
 

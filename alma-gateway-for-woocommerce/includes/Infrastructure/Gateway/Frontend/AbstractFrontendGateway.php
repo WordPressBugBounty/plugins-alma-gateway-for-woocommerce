@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Domain\Entity\FeePlanList;
+use Alma\Client\Domain\Entity\FeePlanList;
 use Alma\Gateway\Application\Helper\ExcludedProductsHelper;
 use Alma\Gateway\Application\Service\ConfigService;
 use Alma\Gateway\Infrastructure\Adapter\CartAdapter;
@@ -18,7 +18,7 @@ use Alma\Gateway\Infrastructure\Helper\ContextHelper;
 use Alma\Gateway\Infrastructure\Helper\FormHelper;
 use Alma\Gateway\Infrastructure\Repository\FeePlanRepository;
 use Alma\Gateway\Plugin;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\FormHelperInterface;
+use Alma\Plugin\Infrastructure\Helper\FormHelperInterface;
 use WC_Order;
 
 /**

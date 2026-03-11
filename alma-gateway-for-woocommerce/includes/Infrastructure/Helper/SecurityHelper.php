@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Infrastructure\Exception\Helper\HelperException;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\SecurityHelperInterface;
+use Alma\Plugin\Infrastructure\Helper\SecurityHelperInterface;
 
 class SecurityHelper implements SecurityHelperInterface {
 

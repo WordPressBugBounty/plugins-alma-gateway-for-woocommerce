@@ -8,9 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Alma\Gateway\Infrastructure\Adapter\CartAdapter;
 use Alma\Gateway\Infrastructure\Adapter\CustomerAdapter;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\CustomerAdapterInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\ContextHelperInterface;
+use Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\CustomerAdapterInterface;
+use Alma\Plugin\Infrastructure\Helper\ContextHelperInterface;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 
 class ContextHelper implements ContextHelperInterface {

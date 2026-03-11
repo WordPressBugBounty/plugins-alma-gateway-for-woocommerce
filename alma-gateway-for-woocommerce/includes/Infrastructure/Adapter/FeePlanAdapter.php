@@ -6,17 +6,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Domain\Entity\FeePlan;
-use Alma\Vendor\Alma\Client\Domain\Entity\PaymentPlanTrait;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterEligibilityAwareInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterLocalConfigurationAwareInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanInterface;
+use Alma\Client\Domain\Entity\FeePlan;
+use Alma\Client\Domain\Entity\PaymentPlanTrait;
+use Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterEligibilityAwareInterface;
+use Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterLocalConfigurationAwareInterface;
+use Alma\Plugin\Infrastructure\Adapter\FeePlanInterface;
 
 /**
  * Adapter for Alma's FeePlan to implement FeePlanAdapterInterface.
  *
- * This class wraps around an instance of Alma\Vendor\Alma\Client\Domain\Entity\FeePlan
+ * This class wraps around an instance of Alma\Client\Domain\Entity\FeePlan
  *
  * @see FeePlanAdapterInterface
  *

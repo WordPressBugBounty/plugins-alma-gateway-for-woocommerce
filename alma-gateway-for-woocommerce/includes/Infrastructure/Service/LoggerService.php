@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Psr\Log\LogLevel;
+use Psr\Log\LogLevel;
 
 class LoggerService extends AbstractLoggerService {
 

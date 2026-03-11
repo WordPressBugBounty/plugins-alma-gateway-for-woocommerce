@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Domain\Entity\WidgetInterface;
-use Alma\Vendor\Alma\Client\Domain\ValueObject\Environment;
+use Alma\Client\Domain\Entity\WidgetInterface;
+use Alma\Client\Domain\ValueObject\Environment;
 use Alma\Gateway\Application\Exception\Service\WidgetServiceException;
 use Alma\Gateway\Application\Helper\ExcludedProductsHelper;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanListAdapter;

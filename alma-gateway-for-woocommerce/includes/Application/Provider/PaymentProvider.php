@@ -6,18 +6,18 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Application\DTO\CustomerDto;
-use Alma\Vendor\Alma\Client\Application\DTO\OrderDto;
-use Alma\Vendor\Alma\Client\Application\DTO\PaymentDto;
-use Alma\Vendor\Alma\Client\Application\DTO\RefundDto;
-use Alma\Vendor\Alma\Client\Application\Endpoint\PaymentEndpoint;
-use Alma\Vendor\Alma\Client\Application\Exception\Endpoint\PaymentEndpointException;
-use Alma\Vendor\Alma\Client\Domain\Entity\Payment;
+use Alma\Client\Application\DTO\CustomerDto;
+use Alma\Client\Application\DTO\OrderDto;
+use Alma\Client\Application\DTO\PaymentDto;
+use Alma\Client\Application\DTO\RefundDto;
+use Alma\Client\Application\Endpoint\PaymentEndpoint;
+use Alma\Client\Application\Exception\Endpoint\PaymentEndpointException;
+use Alma\Client\Domain\Entity\Payment;
 use Alma\Gateway\Application\Exception\Provider\PaymentProviderException;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
-use Alma\Vendor\Alma\Plugin\Application\Port\PaymentProviderInterface;
-use Alma\Vendor\Psr\Log\LoggerInterface;
-use Alma\Vendor\Psr\Log\NullLogger;
+use Alma\Plugin\Application\Port\PaymentProviderInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class PaymentProvider implements PaymentProviderInterface, ProviderInterface {
 

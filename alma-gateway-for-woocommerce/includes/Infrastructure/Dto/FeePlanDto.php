@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Application\DTO\DtoInterface;
+use Alma\Client\Application\DTO\DtoInterface;
 
 class FeePlanDto implements DtoInterface {
 	private int $installmentsCount;

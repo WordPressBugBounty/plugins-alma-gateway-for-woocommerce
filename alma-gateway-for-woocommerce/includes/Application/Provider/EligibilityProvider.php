@@ -6,12 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Application\DTO\EligibilityDto;
-use Alma\Vendor\Alma\Client\Application\Endpoint\EligibilityEndpoint;
-use Alma\Vendor\Alma\Client\Application\Exception\Endpoint\EligibilityEndpointException;
-use Alma\Vendor\Alma\Client\Domain\Entity\EligibilityList;
+use Alma\Client\Application\DTO\EligibilityDto;
+use Alma\Client\Application\Endpoint\EligibilityEndpoint;
+use Alma\Client\Application\Exception\Endpoint\EligibilityEndpointException;
+use Alma\Client\Domain\Entity\EligibilityList;
 use Alma\Gateway\Application\Exception\Provider\EligibilityProviderException;
-use Alma\Vendor\Alma\Plugin\Application\Port\EligibilityProviderInterface;
+use Alma\Plugin\Application\Port\EligibilityProviderInterface;
 
 class EligibilityProvider implements EligibilityProviderInterface, ProviderInterface {
 

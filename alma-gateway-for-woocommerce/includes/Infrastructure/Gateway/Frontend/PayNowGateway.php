@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Domain\ValueObject\PaymentMethod;
+use Alma\Client\Domain\ValueObject\PaymentMethod;
 use Alma\Gateway\Application\Exception\Helper\TemplateHelperException;
 use Alma\Gateway\Application\Helper\TemplateHelper;
 use Alma\Gateway\Application\Service\ConfigService;
@@ -14,7 +14,7 @@ use Alma\Gateway\Infrastructure\Adapter\FeePlanAdapter;
 use Alma\Gateway\Infrastructure\Exception\Gateway\GatewayException;
 use Alma\Gateway\Infrastructure\Helper\AssetsHelper;
 use Alma\Gateway\Plugin;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
 
 /**
  * Class Gateway

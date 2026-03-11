@@ -6,10 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Application\DTO\MerchantBusinessEvent\CartInitiatedBusinessEventDto;
-use Alma\Vendor\Alma\Client\Application\DTO\MerchantBusinessEvent\OrderConfirmedBusinessEventDto;
-use Alma\Vendor\Alma\Client\Application\Exception\ParametersException;
-use Alma\Vendor\Alma\Client\Domain\Entity\EligibilityList;
+use Alma\Client\Application\DTO\MerchantBusinessEvent\CartInitiatedBusinessEventDto;
+use Alma\Client\Application\DTO\MerchantBusinessEvent\OrderConfirmedBusinessEventDto;
+use Alma\Client\Application\Exception\ParametersException;
+use Alma\Client\Domain\Entity\EligibilityList;
 use Alma\Gateway\Application\Exception\Provider\MerchantProviderException;
 use Alma\Gateway\Application\Exception\Service\BusinessEventsServiceException;
 use Alma\Gateway\Application\Provider\MerchantProviderAwareTrait;

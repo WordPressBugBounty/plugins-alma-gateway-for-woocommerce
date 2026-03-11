@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Application\Helper\DisplayHelper;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
 use WC_Cart;
 
 class CartAdapter implements CartAdapterInterface {

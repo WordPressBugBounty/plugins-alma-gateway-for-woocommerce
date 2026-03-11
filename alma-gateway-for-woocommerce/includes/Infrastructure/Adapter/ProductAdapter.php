@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Application\Helper\DisplayHelper;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
 use BadMethodCallException;
 use WC_Product;
 

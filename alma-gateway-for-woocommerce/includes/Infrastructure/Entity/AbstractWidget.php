@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Domain\Entity\WidgetInterface;
-use Alma\Vendor\Alma\Client\Domain\ValueObject\Environment;
+use Alma\Client\Domain\Entity\WidgetInterface;
+use Alma\Client\Domain\ValueObject\Environment;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanAdapter;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanListAdapter;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
 
 abstract class AbstractWidget implements WidgetInterface {
 
@@ -55,9 +55,8 @@ abstract class AbstractWidget implements WidgetInterface {
 	 * @see assets/js/frontend/alma-frontend-widget-implementation.js
 	 */
 	public function getConfiguration(): array {
-
 		return array(
-			'environment'             => $this->environment,
+			'environment'             => $this->environment->getMode(),
 			'widget_selector'         => sprintf( '.%s', self::WIDGET_CLASS ),
 			'widget_default_selector' => sprintf( '.%s', self::WIDGET_DEFAULT_CLASS ),
 			'merchant_id'             => $this->merchantId,
