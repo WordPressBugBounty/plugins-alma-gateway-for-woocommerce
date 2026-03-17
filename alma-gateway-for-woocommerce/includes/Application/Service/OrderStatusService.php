@@ -10,7 +10,7 @@ use Alma\Gateway\Application\Provider\PaymentProviderAwareTrait;
 use Alma\Gateway\Application\Provider\PaymentProviderFactory;
 use Alma\Gateway\Infrastructure\Exception\Repository\ProductRepositoryException;
 use Alma\Gateway\Infrastructure\Helper\EventHelper;
-use Alma\Plugin\Infrastructure\Repository\OrderRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\OrderRepositoryInterface;
 
 class OrderStatusService {
 

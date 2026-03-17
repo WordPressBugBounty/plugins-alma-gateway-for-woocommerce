@@ -6,12 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Domain\Entity\Payment;
+use Alma\Vendor\Alma\Client\Domain\Entity\Payment;
 use Alma\Gateway\Application\Exception\Provider\PaymentProviderException;
 use Alma\Gateway\Application\Exception\Service\FraudServiceException;
 use Alma\Gateway\Application\Provider\PaymentProviderAwareTrait;
 use Alma\Gateway\Application\Provider\PaymentProviderFactory;
-use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
 
 class FraudService {
 

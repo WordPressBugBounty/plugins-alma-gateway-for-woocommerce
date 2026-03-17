@@ -6,12 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\DTO\AddressDto;
-use Alma\Client\Application\DTO\PaymentDto;
+use Alma\Vendor\Alma\Client\Application\DTO\AddressDto;
+use Alma\Vendor\Alma\Client\Application\DTO\PaymentDto;
 use Alma\Gateway\Application\Helper\IpnHelper;
 use Alma\Gateway\Infrastructure\Helper\ContextHelper;
-use Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
 
 class PaymentMapper {
 

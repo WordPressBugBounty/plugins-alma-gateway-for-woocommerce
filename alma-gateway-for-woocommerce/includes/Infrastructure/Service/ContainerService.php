@@ -6,16 +6,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\ClientConfiguration;
-use Alma\Client\Application\CurlClient;
-use Alma\Client\Application\Endpoint\ConfigurationEndpoint;
-use Alma\Client\Application\Endpoint\DataExportEndpoint;
-use Alma\Client\Application\Endpoint\EligibilityEndpoint;
-use Alma\Client\Application\Endpoint\MerchantEndpoint;
-use Alma\Client\Application\Endpoint\OrderEndpoint;
-use Alma\Client\Application\Endpoint\PaymentEndpoint;
-use Alma\Client\Application\Endpoint\ShareOfCheckoutEndpoint;
-use Alma\Client\Application\Endpoint\WebhookEndpoint;
+use Alma\Vendor\Alma\Client\Application\ClientConfiguration;
+use Alma\Vendor\Alma\Client\Application\CurlClient;
+use Alma\Vendor\Alma\Client\Application\Endpoint\ConfigurationEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\DataExportEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\EligibilityEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\MerchantEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\OrderEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\PaymentEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\ShareOfCheckoutEndpoint;
+use Alma\Vendor\Alma\Client\Application\Endpoint\WebhookEndpoint;
 use Alma\Gateway\Application\Helper\EncryptorHelper;
 use Alma\Gateway\Application\Helper\ExcludedProductsHelper;
 use Alma\Gateway\Application\Helper\IpnHelper;
@@ -55,24 +55,24 @@ use Alma\Gateway\Infrastructure\Repository\ProductCategoryRepository;
 use Alma\Gateway\Infrastructure\Repository\ProductRepository;
 use Alma\Gateway\Infrastructure\Repository\UserRepository;
 use Alma\Gateway\Plugin;
-use Alma\Plugin\Application\Helper\ExcludedProductsHelperInterface;
-use Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
-use Alma\Plugin\Infrastructure\Helper\ContextHelperInterface;
-use Alma\Plugin\Infrastructure\Helper\EventHelperInterface;
-use Alma\Plugin\Infrastructure\Helper\FormHelperInterface;
-use Alma\Plugin\Infrastructure\Helper\NavigationHelperInterface;
-use Alma\Plugin\Infrastructure\Helper\SecurityHelperInterface;
-use Alma\Plugin\Infrastructure\Helper\SessionHelperInterface;
-use Alma\Plugin\Infrastructure\Repository\ConfigRepositoryInterface;
-use Alma\Plugin\Infrastructure\Repository\GatewayRepositoryInterface;
-use Alma\Plugin\Infrastructure\Repository\OrderRepositoryInterface;
-use Alma\Plugin\Infrastructure\Repository\ProductCategoryRepositoryInterface;
-use Alma\Plugin\Infrastructure\Repository\ProductRepositoryInterface;
-use Dice\Dice;
-use Psr\Http\Client\ClientInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Alma\Plugin\Application\Helper\ExcludedProductsHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\ContextHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\EventHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\FormHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\NavigationHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\SecurityHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\SessionHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\ConfigRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\GatewayRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\OrderRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\ProductCategoryRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\ProductRepositoryInterface;
+use Alma\Vendor\Dice\Dice;
+use Alma\Vendor\Psr\Http\Client\ClientInterface;
+use Alma\Vendor\Psr\Log\NullLogger;
 
 
 /**

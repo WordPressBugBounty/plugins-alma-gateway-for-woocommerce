@@ -4,93 +4,200 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1b915a6e991bc052e47ed55800019b39
+class ComposerStaticInitc0cd2565a239441051997b4f32f19fe9
 {
-    public static $files = array (
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
-        'P' => 
-        array (
-            'Psr\\Log\\' => 8,
-            'Psr\\Http\\Message\\' => 17,
-            'Psr\\Http\\Client\\' => 16,
-        ),
-        'G' => 
-        array (
-            'GuzzleHttp\\Psr7\\' => 16,
-            'GuzzleHttp\\Promise\\' => 19,
-            'GuzzleHttp\\' => 11,
-        ),
-        'D' => 
-        array (
-            'Dice\\' => 5,
-        ),
         'A' => 
         array (
-            'Alma\\Plugin\\' => 12,
             'Alma\\Gateway\\' => 13,
-            'Alma\\Client\\' => 12,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Psr\\Log\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
-        ),
-        'Psr\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
-            1 => __DIR__ . '/..' . '/psr/http-factory/src',
-        ),
-        'Psr\\Http\\Client\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-client/src',
-        ),
-        'GuzzleHttp\\Psr7\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
-        ),
-        'GuzzleHttp\\Promise\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
-        ),
-        'GuzzleHttp\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
-        ),
-        'Dice\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/level-2/dice',
-        ),
-        'Alma\\Plugin\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/alma/alma-php-client/src/Plugin',
-        ),
         'Alma\\Gateway\\' => 
         array (
             0 => __DIR__ . '/../..' . '/includes',
         ),
-        'Alma\\Client\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/alma/alma-php-client/src/Client',
-        ),
     );
 
     public static $classMap = array (
+        'Alma\\Gateway\\AbstractPlugin' => __DIR__ . '/../..' . '/includes/AbstractPlugin.php',
+        'Alma\\Gateway\\Application\\Entity\\Form\\FeePlanConfiguration' => __DIR__ . '/../..' . '/includes/Application/Entity/Form/FeePlanConfiguration.php',
+        'Alma\\Gateway\\Application\\Entity\\Form\\FeePlanConfigurationList' => __DIR__ . '/../..' . '/includes/Application/Entity/Form/FeePlanConfigurationList.php',
+        'Alma\\Gateway\\Application\\Entity\\Form\\GatewayConfigurationForm' => __DIR__ . '/../..' . '/includes/Application/Entity/Form/GatewayConfigurationForm.php',
+        'Alma\\Gateway\\Application\\Entity\\Form\\KeyConfiguration' => __DIR__ . '/../..' . '/includes/Application/Entity/Form/KeyConfiguration.php',
+        'Alma\\Gateway\\Application\\Exception\\Entity\\WidgetException' => __DIR__ . '/../..' . '/includes/Application/Exception/Entity/WidgetException.php',
+        'Alma\\Gateway\\Application\\Exception\\Helper\\EncryptorHelperException' => __DIR__ . '/../..' . '/includes/Application/Exception/Helper/EncryptorHelperException.php',
+        'Alma\\Gateway\\Application\\Exception\\Helper\\IpnHelperException' => __DIR__ . '/../..' . '/includes/Application/Exception/Helper/IpnHelperException.php',
+        'Alma\\Gateway\\Application\\Exception\\Helper\\RequirementsHelperException' => __DIR__ . '/../..' . '/includes/Application/Exception/Helper/RequirementsHelperException.php',
+        'Alma\\Gateway\\Application\\Exception\\Helper\\TemplateHelperException' => __DIR__ . '/../..' . '/includes/Application/Exception/Helper/TemplateHelperException.php',
+        'Alma\\Gateway\\Application\\Exception\\Provider\\EligibilityProviderException' => __DIR__ . '/../..' . '/includes/Application/Exception/Provider/EligibilityProviderException.php',
+        'Alma\\Gateway\\Application\\Exception\\Provider\\MerchantProviderException' => __DIR__ . '/../..' . '/includes/Application/Exception/Provider/MerchantProviderException.php',
+        'Alma\\Gateway\\Application\\Exception\\Provider\\PaymentProviderException' => __DIR__ . '/../..' . '/includes/Application/Exception/Provider/PaymentProviderException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\BusinessEventsServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/BusinessEventsServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\FraudServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/FraudServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\GatewayConfigurationFormValidatorServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/GatewayConfigurationFormValidatorServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\GatewayServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/GatewayServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\InPageServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/InPageServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\IpnServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/IpnServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\PaymentServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/PaymentServiceException.php',
+        'Alma\\Gateway\\Application\\Exception\\Service\\WidgetServiceException' => __DIR__ . '/../..' . '/includes/Application/Exception/Service/WidgetServiceException.php',
+        'Alma\\Gateway\\Application\\Helper\\AdminHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/AdminHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\AlmaHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/AlmaHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\DisplayHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/DisplayHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\EncryptorHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/EncryptorHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\ExcludedProductsHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/ExcludedProductsHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\IpnHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/IpnHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\L10nHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/L10nHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\RequirementsHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/RequirementsHelper.php',
+        'Alma\\Gateway\\Application\\Helper\\TemplateHelper' => __DIR__ . '/../..' . '/includes/Application/Helper/TemplateHelper.php',
+        'Alma\\Gateway\\Application\\Mapper\\CartItemMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/CartItemMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\CartMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/CartMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\CustomerMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/CustomerMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\EligibilityMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/EligibilityMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\EligibilityQueryMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/EligibilityQueryMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\OrderMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/OrderMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\PaymentMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/PaymentMapper.php',
+        'Alma\\Gateway\\Application\\Mapper\\RefundMapper' => __DIR__ . '/../..' . '/includes/Application/Mapper/RefundMapper.php',
+        'Alma\\Gateway\\Application\\Provider\\EligibilityProvider' => __DIR__ . '/../..' . '/includes/Application/Provider/EligibilityProvider.php',
+        'Alma\\Gateway\\Application\\Provider\\EligibilityProviderAwareTrait' => __DIR__ . '/../..' . '/includes/Application/Provider/EligibilityProviderAwareTrait.php',
+        'Alma\\Gateway\\Application\\Provider\\EligibilityProviderFactory' => __DIR__ . '/../..' . '/includes/Application/Provider/EligibilityProviderFactory.php',
+        'Alma\\Gateway\\Application\\Provider\\FeePlanProvider' => __DIR__ . '/../..' . '/includes/Application/Provider/FeePlanProvider.php',
+        'Alma\\Gateway\\Application\\Provider\\FeePlanProviderAwareTrait' => __DIR__ . '/../..' . '/includes/Application/Provider/FeePlanProviderAwareTrait.php',
+        'Alma\\Gateway\\Application\\Provider\\FeePlanProviderFactory' => __DIR__ . '/../..' . '/includes/Application/Provider/FeePlanProviderFactory.php',
+        'Alma\\Gateway\\Application\\Provider\\MerchantProvider' => __DIR__ . '/../..' . '/includes/Application/Provider/MerchantProvider.php',
+        'Alma\\Gateway\\Application\\Provider\\MerchantProviderAwareTrait' => __DIR__ . '/../..' . '/includes/Application/Provider/MerchantProviderAwareTrait.php',
+        'Alma\\Gateway\\Application\\Provider\\MerchantProviderFactory' => __DIR__ . '/../..' . '/includes/Application/Provider/MerchantProviderFactory.php',
+        'Alma\\Gateway\\Application\\Provider\\PaymentProvider' => __DIR__ . '/../..' . '/includes/Application/Provider/PaymentProvider.php',
+        'Alma\\Gateway\\Application\\Provider\\PaymentProviderAwareTrait' => __DIR__ . '/../..' . '/includes/Application/Provider/PaymentProviderAwareTrait.php',
+        'Alma\\Gateway\\Application\\Provider\\PaymentProviderFactory' => __DIR__ . '/../..' . '/includes/Application/Provider/PaymentProviderFactory.php',
+        'Alma\\Gateway\\Application\\Provider\\ProviderInterface' => __DIR__ . '/../..' . '/includes/Application/Provider/ProviderInterface.php',
+        'Alma\\Gateway\\Application\\Service\\AuthenticationService' => __DIR__ . '/../..' . '/includes/Application/Service/AuthenticationService.php',
+        'Alma\\Gateway\\Application\\Service\\BusinessEventsService' => __DIR__ . '/../..' . '/includes/Application/Service/BusinessEventsService.php',
+        'Alma\\Gateway\\Application\\Service\\ConfigService' => __DIR__ . '/../..' . '/includes/Application/Service/ConfigService.php',
+        'Alma\\Gateway\\Application\\Service\\FraudService' => __DIR__ . '/../..' . '/includes/Application/Service/FraudService.php',
+        'Alma\\Gateway\\Application\\Service\\GatewayConfigurationFormValidatorService' => __DIR__ . '/../..' . '/includes/Application/Service/GatewayConfigurationFormValidatorService.php',
+        'Alma\\Gateway\\Application\\Service\\InPageService' => __DIR__ . '/../..' . '/includes/Application/Service/InPageService.php',
+        'Alma\\Gateway\\Application\\Service\\IpnService' => __DIR__ . '/../..' . '/includes/Application/Service/IpnService.php',
+        'Alma\\Gateway\\Application\\Service\\OrderStatusService' => __DIR__ . '/../..' . '/includes/Application/Service/OrderStatusService.php',
+        'Alma\\Gateway\\Application\\Service\\PaymentService' => __DIR__ . '/../..' . '/includes/Application/Service/PaymentService.php',
+        'Alma\\Gateway\\Application\\Service\\PluginService' => __DIR__ . '/../..' . '/includes/Application/Service/PluginService.php',
+        'Alma\\Gateway\\Application\\Service\\WidgetService' => __DIR__ . '/../..' . '/includes/Application/Service/WidgetService.php',
+        'Alma\\Gateway\\Domain\\Exception\\AlmaException' => __DIR__ . '/../..' . '/includes/Domain/Exception/AlmaException.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\BillingAddressAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/BillingAddressAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\CartAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/CartAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\CustomerAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/CustomerAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\FeePlanAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/FeePlanAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\FeePlanAdapterEligibilityAwareTrait' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/FeePlanAdapterEligibilityAwareTrait.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\FeePlanAdapterLocalConfigurationAwareTrait' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/FeePlanAdapterLocalConfigurationAwareTrait.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\FeePlanListAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/FeePlanListAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\OrderAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/OrderAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\OrderLineAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/OrderLineAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\ProductAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/ProductAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\ShippingAddressAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/ShippingAddressAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Adapter\\UserAdapter' => __DIR__ . '/../..' . '/includes/Infrastructure/Adapter/UserAdapter.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Gateway\\AbstractGatewayBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Gateway/AbstractGatewayBlock.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Gateway\\CreditGatewayBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Gateway/CreditGatewayBlock.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Gateway\\GatewayBlockFactory' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Gateway/GatewayBlockFactory.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Gateway\\PayLaterGatewayBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Gateway/PayLaterGatewayBlock.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Gateway\\PayNowGatewayBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Gateway/PayNowGatewayBlock.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Gateway\\PnxGatewayBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Gateway/PnxGatewayBlock.php',
+        'Alma\\Gateway\\Infrastructure\\Block\\Widget\\WidgetBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Widget/WidgetBlock.php',
+        'Alma\\Gateway\\Infrastructure\\Config\\AssetsConfig' => __DIR__ . '/../..' . '/includes/Infrastructure/Config/AssetsConfig.php',
+        'Alma\\Gateway\\Infrastructure\\Controller\\AdminController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/AdminController.php',
+        'Alma\\Gateway\\Infrastructure\\Controller\\GatewayController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/GatewayController.php',
+        'Alma\\Gateway\\Infrastructure\\Controller\\ShopController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/ShopController.php',
+        'Alma\\Gateway\\Infrastructure\\Dto\\FeePlanDto' => __DIR__ . '/../..' . '/includes/Infrastructure/Dto/FeePlanDto.php',
+        'Alma\\Gateway\\Infrastructure\\Dto\\FeePlanListDto' => __DIR__ . '/../..' . '/includes/Infrastructure/Dto/FeePlanListDto.php',
+        'Alma\\Gateway\\Infrastructure\\Entity\\AbstractWidget' => __DIR__ . '/../..' . '/includes/Infrastructure/Entity/AbstractWidget.php',
+        'Alma\\Gateway\\Infrastructure\\Entity\\CartWidget' => __DIR__ . '/../..' . '/includes/Infrastructure/Entity/CartWidget.php',
+        'Alma\\Gateway\\Infrastructure\\Entity\\ProductWidget' => __DIR__ . '/../..' . '/includes/Infrastructure/Entity/ProductWidget.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Block\\CheckoutBlockException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Block/CheckoutBlockException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Block\\WidgetBlockException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Block/WidgetBlockException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Controller\\AdminControllerException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Controller/AdminControllerException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Controller\\AssetsControllerException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Controller/AssetsControllerException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Controller\\GatewayControllerException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Controller/GatewayControllerException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Controller\\ShopControllerException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Controller/ShopControllerException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Entity\\CartWidgetException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Entity/CartWidgetException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Entity\\ProductWidgetException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Entity/ProductWidgetException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Gateway\\GatewayException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Gateway/GatewayException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Helper\\HelperException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Helper/HelperException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\PluginException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/PluginException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\ConfigRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/ConfigRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\FeePlanRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/FeePlanRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\GatewayRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/GatewayRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\OrderRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/OrderRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\ProductCategoryRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/ProductCategoryRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\ProductRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/ProductRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Repository\\UserRepositoryException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Repository/UserRepositoryException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Service\\AssetsServiceException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Service/AssetsServiceException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Service\\CacheServiceException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Service/CacheServiceException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Service\\CheckoutServiceException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Service/CheckoutServiceException.php',
+        'Alma\\Gateway\\Infrastructure\\Exception\\Service\\LoggerServiceException' => __DIR__ . '/../..' . '/includes/Infrastructure/Exception/Service/LoggerServiceException.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\AbstractGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/AbstractGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Backend\\AbstractBackendGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Backend/AbstractBackendGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Backend\\AlmaGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Backend/AlmaGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Frontend\\AbstractFrontendGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Frontend/AbstractFrontendGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Frontend\\CreditGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Frontend/CreditGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Frontend\\FrontendGatewayInterface' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Frontend/FrontendGatewayInterface.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Frontend\\PayLaterGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Frontend/PayLaterGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Frontend\\PayNowGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Frontend/PayNowGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Gateway\\Frontend\\PnxGateway' => __DIR__ . '/../..' . '/includes/Infrastructure/Gateway/Frontend/PnxGateway.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\AdminMenuHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/AdminMenuHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\AdminNotificationHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/AdminNotificationHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\AjaxHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/AjaxHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\AssetsHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/AssetsHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\BackendHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/BackendHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\BlocksWidgetHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/BlocksWidgetHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\CartHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CartHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\CmsHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CmsHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\ContextHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/ContextHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\CoreHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CoreHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\EventHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/EventHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\FormHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/FormHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\FrontendHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/FrontendHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\InPageHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/InPageHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\LanguageHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/LanguageHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\NavigationHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/NavigationHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\OrderHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/OrderHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\ParameterHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/ParameterHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\RenderHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/RenderHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\SecurityHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/SecurityHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\SessionHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/SessionHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\ShopNotificationHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/ShopNotificationHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\ShortcodeWidgetHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/ShortcodeWidgetHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\UrlHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/UrlHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\WordPressHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/WordPressHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Mapper\\ConfigFormMapper' => __DIR__ . '/../..' . '/includes/Infrastructure/Mapper/ConfigFormMapper.php',
+        'Alma\\Gateway\\Infrastructure\\Mapper\\FeePlanListMapper' => __DIR__ . '/../..' . '/includes/Infrastructure/Mapper/FeePlanListMapper.php',
+        'Alma\\Gateway\\Infrastructure\\Mapper\\FeePlanMapper' => __DIR__ . '/../..' . '/includes/Infrastructure/Mapper/FeePlanMapper.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\BusinessEventsRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/BusinessEventsRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\ConfigRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/ConfigRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\FeePlanRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/FeePlanRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\GatewayRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/GatewayRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\OrderRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/OrderRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\ProductCategoryRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/ProductCategoryRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\ProductRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/ProductRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Repository\\UserRepository' => __DIR__ . '/../..' . '/includes/Infrastructure/Repository/UserRepository.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\AbstractLoggerService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/AbstractLoggerService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\AssetsService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/AssetsService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\CacheService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/CacheService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\CheckoutService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/CheckoutService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\ContainerService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/ContainerService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\GatewayService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/GatewayService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\LoggerService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/LoggerService.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\LoggerServiceAwareTrait' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/LoggerServiceAwareTrait.php',
+        'Alma\\Gateway\\Infrastructure\\Service\\MigrationService' => __DIR__ . '/../..' . '/includes/Infrastructure/Service/MigrationService.php',
+        'Alma\\Gateway\\Plugin' => __DIR__ . '/../..' . '/includes/Plugin.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit1b915a6e991bc052e47ed55800019b39::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit1b915a6e991bc052e47ed55800019b39::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit1b915a6e991bc052e47ed55800019b39::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc0cd2565a239441051997b4f32f19fe9::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc0cd2565a239441051997b4f32f19fe9::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitc0cd2565a239441051997b4f32f19fe9::$classMap;
 
         }, null, ClassLoader::class);
     }

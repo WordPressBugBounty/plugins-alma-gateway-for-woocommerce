@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Domain\Entity\FeePlanList;
+use Alma\Vendor\Alma\Client\Domain\Entity\FeePlanList;
 use Alma\Gateway\Application\Exception\Service\PaymentServiceException;
 use Alma\Gateway\Application\Helper\DisplayHelper;
 use Alma\Gateway\Application\Mapper\RefundMapper;
@@ -24,7 +24,7 @@ use Alma\Gateway\Infrastructure\Repository\FeePlanRepository;
 use Alma\Gateway\Infrastructure\Repository\OrderRepository;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
 use Alma\Gateway\Plugin;
-use Psr\Log\LoggerInterface;
+use Alma\Vendor\Psr\Log\LoggerInterface;
 use WC_Payment_Gateway;
 
 /**

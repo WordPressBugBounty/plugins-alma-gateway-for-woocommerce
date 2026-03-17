@@ -6,14 +6,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\ClientConfiguration;
-use Alma\Client\Application\CurlClient;
-use Alma\Client\Application\Endpoint\MerchantEndpoint;
-use Alma\Client\Application\Exception\Endpoint\MerchantEndpointException;
-use Alma\Client\Domain\ValueObject\Environment;
+use Alma\Vendor\Alma\Client\Application\ClientConfiguration;
+use Alma\Vendor\Alma\Client\Application\CurlClient;
+use Alma\Vendor\Alma\Client\Application\Endpoint\MerchantEndpoint;
+use Alma\Vendor\Alma\Client\Application\Exception\Endpoint\MerchantEndpointException;
+use Alma\Vendor\Alma\Client\Domain\ValueObject\Environment;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Psr\Log\LoggerInterface;
+use Alma\Vendor\Psr\Log\NullLogger;
 
 class AuthenticationService {
 

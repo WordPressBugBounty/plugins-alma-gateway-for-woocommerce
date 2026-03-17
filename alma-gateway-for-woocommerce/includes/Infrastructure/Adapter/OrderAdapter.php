@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Alma\Gateway\Application\Helper\DisplayHelper;
 use Alma\Gateway\Infrastructure\Gateway\AbstractGateway;
-use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\OrderLineAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderLineAdapterInterface;
 use BadMethodCallException;
 use WC_Order;
 
@@ -404,7 +404,7 @@ class OrderAdapter implements OrderAdapterInterface {
 	}
 
 	public function getTotalRefunded(): int {
-		return DisplayHelper::price_to_cent( $this->wcOrder->get_total_refunded() );
+		return DisplayHelper::price_to_cent( (float) $this->wcOrder->get_total_refunded() );
 	}
 
 	public function paymentComplete( $paymentId ): bool {

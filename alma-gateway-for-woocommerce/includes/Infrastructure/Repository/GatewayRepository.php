@@ -19,9 +19,9 @@ use Alma\Gateway\Infrastructure\Gateway\Frontend\PayNowGateway;
 use Alma\Gateway\Infrastructure\Gateway\Frontend\PnxGateway;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
 use Alma\Gateway\Plugin;
-use Alma\Plugin\Infrastructure\Repository\GatewayRepositoryInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\GatewayRepositoryInterface;
+use Alma\Vendor\Psr\Log\LoggerInterface;
+use Alma\Vendor\Psr\Log\NullLogger;
 
 class GatewayRepository implements GatewayRepositoryInterface {
 

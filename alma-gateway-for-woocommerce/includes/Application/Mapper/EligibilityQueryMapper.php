@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\DTO\EligibilityQueryDto;
+use Alma\Vendor\Alma\Client\Application\DTO\EligibilityQueryDto;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanAdapter;
 
 class EligibilityQueryMapper {

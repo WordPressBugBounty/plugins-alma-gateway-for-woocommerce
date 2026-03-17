@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Application\Helper\DisplayHelper;
-use Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
 use BadMethodCallException;
 use WC_Product;
 
@@ -42,7 +42,7 @@ class ProductAdapter implements ProductAdapterInterface {
 	}
 
 	public function getPrice(): int {
-		return DisplayHelper::price_to_cent( $this->wc_product->get_price() );
+		return DisplayHelper::price_to_cent( (float) $this->wc_product->get_price() );
 	}
 
 	public function getCategoryIds(): array {

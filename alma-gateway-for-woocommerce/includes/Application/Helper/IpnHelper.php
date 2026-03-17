@@ -6,13 +6,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\Helper\RequestHelper;
+use Alma\Vendor\Alma\Client\Application\Helper\RequestHelper;
 use Alma\Gateway\Application\Exception\Helper\IpnHelperException;
 use Alma\Gateway\Application\Service\IpnService;
 use Alma\Gateway\Infrastructure\Helper\AjaxHelper;
 use Alma\Gateway\Infrastructure\Helper\EventHelper;
 use Alma\Gateway\Plugin;
-use Alma\Plugin\Application\Helper\IpnHelperInterface;
+use Alma\Vendor\Alma\Plugin\Application\Helper\IpnHelperInterface;
 
 class IpnHelper implements IpnHelperInterface {
 

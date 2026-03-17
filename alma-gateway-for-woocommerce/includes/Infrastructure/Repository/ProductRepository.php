@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Alma\Gateway\Infrastructure\Adapter\ProductAdapter;
 use Alma\Gateway\Infrastructure\Exception\Repository\ProductRepositoryException;
-use Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
-use Alma\Plugin\Infrastructure\Repository\ProductRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\ProductRepositoryInterface;
 
 class ProductRepository implements ProductRepositoryInterface {
 

@@ -52,14 +52,14 @@
     ),
     'guzzlehttp/psr7' => 
     array (
-      'pretty_version' => '2.8.x-dev',
-      'version' => '2.8.9999999.9999999-dev',
+      'pretty_version' => '2.9.x-dev',
+      'version' => '2.9.9999999.9999999-dev',
       'type' => 'library',
       'install_path' => __DIR__ . '/../guzzlehttp/psr7',
       'aliases' => 
       array (
       ),
-      'reference' => '27b6714cf2e71cfcc49718eb81ac711103f08218',
+      'reference' => '7d0ed42f28e42d61352a7a79de682e5e67fec884',
       'dev_requirement' => false,
     ),
     'level-2/dice' => 

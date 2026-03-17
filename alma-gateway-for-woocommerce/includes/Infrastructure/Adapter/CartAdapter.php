@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Application\Helper\DisplayHelper;
-use Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
 use WC_Cart;
 
 class CartAdapter implements CartAdapterInterface {
@@ -28,7 +28,7 @@ class CartAdapter implements CartAdapterInterface {
 			return 0;
 		}
 
-		return DisplayHelper::price_to_cent( $this->cart->get_total( null ) );
+		return DisplayHelper::price_to_cent( (float) $this->cart->get_total( null ) );
 	}
 
 	/**

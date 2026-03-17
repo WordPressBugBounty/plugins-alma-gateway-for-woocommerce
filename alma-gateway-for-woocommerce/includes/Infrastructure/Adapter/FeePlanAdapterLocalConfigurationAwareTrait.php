@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\Exception\ParametersException;
+use Alma\Vendor\Alma\Client\Application\Exception\ParametersException;
 
 trait FeePlanAdapterLocalConfigurationAwareTrait {
 

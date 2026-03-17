@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\Exception\ParametersException;
+use Alma\Vendor\Alma\Client\Application\Exception\ParametersException;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanAdapter;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Psr\Log\LoggerInterface;
+use Alma\Vendor\Psr\Log\NullLogger;
 
 /**
  * Class FeePlanDataForm
