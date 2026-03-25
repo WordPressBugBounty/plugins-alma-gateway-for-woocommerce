@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
 
 interface FrontendGatewayInterface {
 

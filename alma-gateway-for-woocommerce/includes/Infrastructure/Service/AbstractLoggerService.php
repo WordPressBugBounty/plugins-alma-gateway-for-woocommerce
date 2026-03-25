@@ -6,9 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Psr\Log\InvalidArgumentException;
-use Alma\Vendor\Psr\Log\LoggerInterface;
-use Alma\Vendor\Psr\Log\LogLevel;
+use Psr\Log\InvalidArgumentException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 use WC_Logger;
 
 abstract class AbstractLoggerService implements LoggerInterface {

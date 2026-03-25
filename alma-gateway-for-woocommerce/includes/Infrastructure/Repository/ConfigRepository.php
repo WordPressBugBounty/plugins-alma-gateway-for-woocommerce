@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\ConfigRepositoryInterface;
+use Alma\Plugin\Infrastructure\Repository\ConfigRepositoryInterface;
 
 /**
  * Class ConfigAdapter to manage WordPress/WooCommerce options.

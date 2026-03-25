@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Application\Service\BusinessEventsService;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\BusinessEventsRepositoryInterface;
+use Alma\Plugin\Infrastructure\Repository\BusinessEventsRepositoryInterface;
 
 class BusinessEventsRepository implements BusinessEventsRepositoryInterface {
 	/**

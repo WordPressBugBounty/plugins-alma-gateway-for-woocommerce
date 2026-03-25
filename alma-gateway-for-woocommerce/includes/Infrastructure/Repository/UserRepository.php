@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Alma\Gateway\Infrastructure\Adapter\UserAdapter;
 use Alma\Gateway\Infrastructure\Exception\Repository\UserRepositoryException;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\UserAdapterInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\UserRepositoryInterface;
+use Alma\Plugin\Infrastructure\Adapter\UserAdapterInterface;
+use Alma\Plugin\Infrastructure\Repository\UserRepositoryInterface;
 
 class UserRepository implements UserRepositoryInterface {
 

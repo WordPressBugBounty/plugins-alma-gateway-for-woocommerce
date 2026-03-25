@@ -6,10 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Application\Exception\ParametersException;
-use Alma\Vendor\Alma\Client\Domain\Entity\Eligibility;
-use Alma\Vendor\Alma\Client\Domain\Entity\EligibilityList;
-use Alma\Vendor\Alma\Client\Domain\Entity\FeePlanList;
+use Alma\Client\Application\Exception\ParametersException;
+use Alma\Client\Domain\Entity\Eligibility;
+use Alma\Client\Domain\Entity\EligibilityList;
+use Alma\Client\Domain\Entity\FeePlanList;
 use Alma\Gateway\Application\Exception\Provider\EligibilityProviderException;
 use Alma\Gateway\Application\Mapper\EligibilityMapper;
 use Alma\Gateway\Application\Provider\EligibilityProviderAwareTrait;

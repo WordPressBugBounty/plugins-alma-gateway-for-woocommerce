@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Infrastructure\Helper\AjaxHelper;
-use Alma\Vendor\Alma\Plugin\Application\Helper\AdminHelperInterface;
+use Alma\Plugin\Application\Helper\AdminHelperInterface;
 
 class AdminHelper implements AdminHelperInterface {
 	/**

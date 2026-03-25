@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Domain\ValueObject\PaymentMethod;
+use Alma\Client\Domain\ValueObject\PaymentMethod;
 use Alma\Gateway\Application\Exception\Helper\TemplateHelperException;
 use Alma\Gateway\Application\Helper\TemplateHelper;
 use Alma\Gateway\Application\Service\ConfigService;
@@ -15,7 +15,7 @@ use Alma\Gateway\Infrastructure\Exception\Gateway\GatewayException;
 use Alma\Gateway\Infrastructure\Helper\AssetsHelper;
 use Alma\Gateway\Infrastructure\Helper\ShopNotificationHelper;
 use Alma\Gateway\Plugin;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
 
 /**
  * Class Gateway
@@ -62,9 +62,11 @@ class CreditGateway extends AbstractFrontendGateway implements FrontendGatewayIn
 		);
 
 		// phpcs:ignore
-		if ( $_POST['alma_plan_key'] && ! $this->check_values( $_POST['alma_plan_key'],
-			array( 'general_6_0_0', 'general_10_0_0', 'general_12_0_0' )
-		) ) {
+		$plan_key = $_POST['alma_plan_key'];
+		if ( $plan_key
+			&& ( ! preg_match( '/^general_(\d+)_0_0$/', $plan_key, $matches )
+				|| (int) $matches[1] < 6 )
+		) {
 			ShopNotificationHelper::notifyError(
 				__(
 					'Please choose a valid option.',

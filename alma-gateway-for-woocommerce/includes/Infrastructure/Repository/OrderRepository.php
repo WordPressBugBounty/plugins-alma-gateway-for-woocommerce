@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Alma\Gateway\Infrastructure\Adapter\OrderAdapter;
 use Alma\Gateway\Infrastructure\Exception\Repository\OrderRepositoryException;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\OrderRepositoryInterface;
+use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Plugin\Infrastructure\Repository\OrderRepositoryInterface;
 
 class OrderRepository implements OrderRepositoryInterface {
 

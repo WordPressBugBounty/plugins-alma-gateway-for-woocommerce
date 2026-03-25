@@ -6,12 +6,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Vendor\Alma\Client\Application\DTO\CartItemDto;
+use Alma\Client\Application\DTO\CartItemDto;
 use Alma\Gateway\Application\Helper\DisplayHelper;
 use Alma\Gateway\Infrastructure\Helper\ContextHelper;
 use Alma\Gateway\Infrastructure\Repository\ProductCategoryRepository;
 use Alma\Gateway\Plugin;
-use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderLineAdapterInterface;
+use Alma\Plugin\Infrastructure\Adapter\OrderLineAdapterInterface;
 
 class CartItemMapper {
 
