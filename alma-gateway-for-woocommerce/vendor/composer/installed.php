@@ -25,7 +25,7 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../alma/alma-php-client',
             'aliases' => array(),
-            'reference' => '3a4d4593e8000a61ce383ba61eb5218d858781c2',
+            'reference' => '5a5d33c5c73fe652d156ef169055fcc9e4f3c614',
             'dev_requirement' => false,
         ),
         'guzzlehttp/guzzle' => array(
