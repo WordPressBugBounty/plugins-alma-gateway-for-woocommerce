@@ -8,8 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Alma\Gateway\Application\Helper\DisplayHelper;
 use Alma\Gateway\Infrastructure\Gateway\AbstractGateway;
-use Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\OrderLineAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\OrderLineAdapterInterface;
 use BadMethodCallException;
 use WC_Order;
 

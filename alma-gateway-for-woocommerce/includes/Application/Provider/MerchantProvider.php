@@ -6,15 +6,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\DTO\MerchantBusinessEvent\CartInitiatedBusinessEventDto;
-use Alma\Client\Application\DTO\MerchantBusinessEvent\OrderConfirmedBusinessEventDto;
-use Alma\Client\Application\Endpoint\MerchantEndpoint;
-use Alma\Client\Application\Exception\Endpoint\MerchantEndpointException;
+use Alma\Vendor\Alma\Client\Application\DTO\MerchantBusinessEvent\CartInitiatedBusinessEventDto;
+use Alma\Vendor\Alma\Client\Application\DTO\MerchantBusinessEvent\OrderConfirmedBusinessEventDto;
+use Alma\Vendor\Alma\Client\Application\Endpoint\MerchantEndpoint;
+use Alma\Vendor\Alma\Client\Application\Exception\Endpoint\MerchantEndpointException;
 use Alma\Gateway\Application\Exception\Provider\MerchantProviderException;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
-use Alma\Plugin\Application\Port\MerchantProviderInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Alma\Plugin\Application\Port\MerchantProviderInterface;
+use Alma\Vendor\Psr\Log\LoggerInterface;
 
 class MerchantProvider implements MerchantProviderInterface, ProviderInterface {
 
@@ -28,10 +27,11 @@ class MerchantProvider implements MerchantProviderInterface, ProviderInterface {
 	 * MerchantProvider constructor.
 	 *
 	 * @param MerchantEndpoint $merchantEndpoint The merchant endpoint to use for API calls.
+	 * @param LoggerService    $loggerService
 	 */
-	public function __construct( MerchantEndpoint $merchantEndpoint, ?LoggerService $loggerService = null ) {
+	public function __construct( MerchantEndpoint $merchantEndpoint, LoggerService $loggerService ) {
 		$this->merchantEndpoint = $merchantEndpoint;
-		$this->loggerService    = $loggerService ?? new NullLogger();
+		$this->loggerService    = $loggerService;
 	}
 
 	/**

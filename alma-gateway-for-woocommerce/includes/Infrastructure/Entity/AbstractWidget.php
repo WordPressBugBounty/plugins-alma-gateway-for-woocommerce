@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Domain\Entity\WidgetInterface;
-use Alma\Client\Domain\ValueObject\Environment;
+use Alma\Vendor\Alma\Client\Domain\Entity\WidgetInterface;
+use Alma\Vendor\Alma\Client\Domain\ValueObject\Environment;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanAdapter;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanListAdapter;
-use Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
 
 abstract class AbstractWidget implements WidgetInterface {
 

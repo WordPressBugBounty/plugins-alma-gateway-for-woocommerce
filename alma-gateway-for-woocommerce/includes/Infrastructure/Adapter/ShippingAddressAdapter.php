@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Plugin\Infrastructure\Adapter\ShippingAddressAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\ShippingAddressAdapterInterface;
 use WC_Customer;
 
 class ShippingAddressAdapter implements ShippingAddressAdapterInterface {

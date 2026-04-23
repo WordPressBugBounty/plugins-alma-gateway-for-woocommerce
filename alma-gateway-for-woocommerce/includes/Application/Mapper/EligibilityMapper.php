@@ -6,8 +6,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Application\DTO\AddressDto;
-use Alma\Client\Application\DTO\EligibilityDto;
+use Alma\Vendor\Alma\Client\Application\DTO\AddressDto;
+use Alma\Vendor\Alma\Client\Application\DTO\EligibilityDto;
 use Alma\Gateway\Infrastructure\Adapter\CartAdapter;
 use Alma\Gateway\Infrastructure\Adapter\CustomerAdapter;
 use Alma\Gateway\Infrastructure\Adapter\FeePlanListAdapter;

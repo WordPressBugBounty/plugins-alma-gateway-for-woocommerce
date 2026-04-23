@@ -19,9 +19,8 @@ use Alma\Gateway\Infrastructure\Helper\ShopNotificationHelper;
 use Alma\Gateway\Infrastructure\Repository\OrderRepository;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
 use Alma\Gateway\Plugin;
-use Alma\Plugin\Infrastructure\Helper\NavigationHelperInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\NavigationHelperInterface;
+use Alma\Vendor\Psr\Log\LoggerInterface;
 
 /**
  * Class IpnService
@@ -57,14 +56,14 @@ class IpnService {
 		PaymentProvider $paymentService,
 		NavigationHelperInterface $navigationHelper,
 		IpnHelper $ipnHelper,
-		?LoggerService $loggerService = null
+		LoggerService $loggerService
 	) {
 		$this->configService    = $configService;
 		$this->fraudService     = $fraudService;
 		$this->paymentService   = $paymentService;
 		$this->navigationHelper = $navigationHelper;
 		$this->ipnHelper        = $ipnHelper;
-		$this->loggerService    = $loggerService ?? new NullLogger();
+		$this->loggerService    = $loggerService;
 	}
 
 	/**

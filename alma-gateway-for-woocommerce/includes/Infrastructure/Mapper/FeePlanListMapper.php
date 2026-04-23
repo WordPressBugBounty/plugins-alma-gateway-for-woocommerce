@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Alma\Gateway\Infrastructure\Dto\FeePlanListDto;
-use Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
 
 class FeePlanListMapper {
 

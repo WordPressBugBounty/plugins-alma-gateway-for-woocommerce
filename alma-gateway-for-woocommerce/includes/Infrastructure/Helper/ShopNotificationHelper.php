@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Plugin\Infrastructure\Helper\ShopNotificationHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Helper\ShopNotificationHelperInterface;
 
 class ShopNotificationHelper implements ShopNotificationHelperInterface {
 

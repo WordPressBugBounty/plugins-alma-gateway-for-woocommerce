@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Client\Domain\Entity\FeePlanList;
-use Alma\Client\Domain\ValueObject\PaymentMethod;
-use Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\FeePlanListInterface;
+use Alma\Vendor\Alma\Client\Domain\Entity\FeePlanList;
+use Alma\Vendor\Alma\Client\Domain\ValueObject\PaymentMethod;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanListAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\FeePlanListInterface;
 use ArrayObject;
 
 /**

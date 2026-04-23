@@ -6,9 +6,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Plugin\Application\Helper\ExcludedProductsHelperInterface;
-use Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
-use Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Application\Helper\ExcludedProductsHelperInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\CartAdapterInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Adapter\ProductAdapterInterface;
 
 class ExcludedProductsHelper implements ExcludedProductsHelperInterface {
 

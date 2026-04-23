@@ -19,9 +19,8 @@ use Alma\Gateway\Infrastructure\Gateway\Frontend\PayNowGateway;
 use Alma\Gateway\Infrastructure\Gateway\Frontend\PnxGateway;
 use Alma\Gateway\Infrastructure\Service\LoggerService;
 use Alma\Gateway\Plugin;
-use Alma\Plugin\Infrastructure\Repository\GatewayRepositoryInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\GatewayRepositoryInterface;
+use Alma\Vendor\Psr\Log\LoggerInterface;
 
 class GatewayRepository implements GatewayRepositoryInterface {
 
@@ -53,8 +52,8 @@ class GatewayRepository implements GatewayRepositoryInterface {
 		CreditGatewayBlock::class,
 	];
 
-	public function __construct( ?LoggerService $loggerService = null ) {
-		$this->loggerService = $loggerService ?? new NullLogger();
+	public function __construct( LoggerService $loggerService ) {
+		$this->loggerService = $loggerService;
 	}
 
 	/**

@@ -23,7 +23,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'bedb55ed57f72685d916d9fc15e36c4f3cb0e055',
+      'reference' => 'f095065bfec5e0f5f2f47fd3643d4413bc71e246',
       'dev_requirement' => false,
     ),
     'guzzlehttp/guzzle' => 

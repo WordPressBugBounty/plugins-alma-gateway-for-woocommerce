@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die( 'Not allowed' ); // Exit if accessed directly.
 }
 
-use Alma\Plugin\Infrastructure\Repository\ProductCategoryRepositoryInterface;
+use Alma\Vendor\Alma\Plugin\Infrastructure\Repository\ProductCategoryRepositoryInterface;
 
 class ProductCategoryRepository implements ProductCategoryRepositoryInterface {
 
@@ -24,6 +24,13 @@ class ProductCategoryRepository implements ProductCategoryRepositoryInterface {
 				'hide_empty' => false,
 			)
 		);
+
+		// get_terms() returns WP_Error when the taxonomy is not yet registered
+		// (e.g. when another plugin triggers gateway loading before WooCommerce
+		// has fully initialized).
+		if ( is_wp_error( $product_categories ) || ! is_array( $product_categories ) ) {
+			return array();
+		}
 
 		return array_combine(
 			array_column( $product_categories, 'slug' ),
