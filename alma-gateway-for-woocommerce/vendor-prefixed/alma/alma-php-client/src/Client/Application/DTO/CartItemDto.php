@@ -5,24 +5,24 @@ namespace Alma\Vendor\Alma\Client\Application\DTO;
 use InvalidArgumentException;
 
 class CartItemDto implements DtoInterface {
-    private ?string $sku = null;
-    private string $title;
+    private ?string $sku;
+    private ?string $title;
     private int $quantity;
-    private ?int $unitPrice = null;
+    private ?int $unitPrice;
     private int $linePrice;
     private array $categories = [];
-    private ?string $url = null;
-    private ?string $pictureUrl = null;
-    private ?bool $requiresShipping = null;
+    private ?string $url;
+    private string $pictureUrl;
+    private ?bool $requiresShipping;
 
     public function __construct(
         int $quantity,
         int $linePrice,
-        string $title
+        string $pictureUrl
     ) {
         $this->setQuantity($quantity);
         $this->setLinePrice($linePrice);
-        $this->setTitle($title);
+        $this->setPictureUrl($pictureUrl);
     }
 
     public function setSku(string $sku): self {
@@ -31,9 +31,6 @@ class CartItemDto implements DtoInterface {
     }
 
     public function setTitle(string $title): self {
-        if (empty($title)) {
-            throw new InvalidArgumentException("Title can't be empty.");
-        }
         $this->title = $title;
         return $this;
     }
@@ -64,17 +61,19 @@ class CartItemDto implements DtoInterface {
         $this->categories = $categories;
         return $this;
     }
-    public function setUrl(?string $url): self {
-        if ($url !== null && $url !== '' && filter_var($url, FILTER_VALIDATE_URL)) {
-            $this->url = $url;
+    public function setUrl(string $url): self {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new InvalidArgumentException("Invalid URL format.");
         }
+        $this->url = $url;
         return $this;
     }
 
-    public function setPictureUrl(?string $pictureUrl): self {
-        if ($pictureUrl !== null && $pictureUrl !== '' && filter_var($pictureUrl, FILTER_VALIDATE_URL)) {
-            $this->pictureUrl = $pictureUrl;
+    public function setPictureUrl(string $pictureUrl): self {
+        if (!filter_var($pictureUrl, FILTER_VALIDATE_URL)) {
+            throw new InvalidArgumentException("Invalid URL format.");
         }
+        $this->pictureUrl = $pictureUrl;
         return $this;
     }
 

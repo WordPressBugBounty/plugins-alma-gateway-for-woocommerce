@@ -36,4 +36,11 @@ interface FeePlanListInterface
      * @return FeePlanListInterface
      */
     public function filterFeePlanList(array $paymentMethod): FeePlanListInterface;
+
+    /**
+     * Returns a FeePlanList containing only enabled FeePlans.
+     *
+     * @return FeePlanListInterface
+     */
+    public function filterEnabled(): FeePlanListInterface;
 }
