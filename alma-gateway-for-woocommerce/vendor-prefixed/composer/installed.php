@@ -16,14 +16,14 @@
   array (
     'alma/alma-php-client' => 
     array (
-      'pretty_version' => 'dev-feature/3.0',
-      'version' => 'dev-feature/3.0',
+      'pretty_version' => '3.0.1',
+      'version' => '3.0.1.0',
       'type' => 'library',
       'install_path' => __DIR__ . '/../alma/alma-php-client',
       'aliases' => 
       array (
       ),
-      'reference' => 'bedb55ed57f72685d916d9fc15e36c4f3cb0e055',
+      'reference' => '5b328032c530f45ff5d65d63557f32c87b639b9d',
       'dev_requirement' => false,
     ),
     'guzzlehttp/guzzle' => 
@@ -35,7 +35,7 @@
       'aliases' => 
       array (
       ),
-      'reference' => 'b51ac707cfa420b7bfd4e4d5e510ba8008e822b4',
+      'reference' => 'fb92d95f80a9da51bf8f2a5b26d8e8ea3b6d99ed',
       'dev_requirement' => false,
     ),
     'guzzlehttp/promises' => 
@@ -47,19 +47,19 @@
       'aliases' => 
       array (
       ),
-      'reference' => '481557b130ef3790cf82b713667b43030dc9c957',
+      'reference' => '74c1b7186ecda8058c8958a1b2d3e8ef4419a84e',
       'dev_requirement' => false,
     ),
     'guzzlehttp/psr7' => 
     array (
-      'pretty_version' => '2.8.x-dev',
-      'version' => '2.8.9999999.9999999-dev',
+      'pretty_version' => '2.9.x-dev',
+      'version' => '2.9.9999999.9999999-dev',
       'type' => 'library',
       'install_path' => __DIR__ . '/../guzzlehttp/psr7',
       'aliases' => 
       array (
       ),
-      'reference' => '21dc724a0583619cd1652f673303492272778051',
+      'reference' => '7d0ed42f28e42d61352a7a79de682e5e67fec884',
       'dev_requirement' => false,
     ),
     'level-2/dice' => 
