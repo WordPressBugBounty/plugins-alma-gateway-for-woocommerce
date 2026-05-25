@@ -5,6 +5,47 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.11.0 - TBD
+
+### Changed
+
+- Changed `Utils::copyToStream()` to retry short destination writes and throw when destination streams cannot make progress
+- Changed `Header::parse()` to split semicolon-separated parameters without repeated regular expression lookaheads
+
+### Deprecated
+
+- Deprecated invalid PSR-7 arguments that guzzlehttp/psr7 3.0 will require native types for
+- Deprecated non-string header values that guzzlehttp/psr7 3.0 will reject
+- Deprecated empty header value arrays that guzzlehttp/psr7 3.0 will reject
+- Deprecated URI schemes that do not match guzzlehttp/psr7 3.0 syntax requirements
+- Deprecated multipart boundary and custom part header metadata that guzzlehttp/psr7 3.0 will reject
+- Deprecated relying on automatic uppercasing of explicitly provided HTTP request methods; guzzlehttp/psr7 3.0 preserves request method casing
+
+## 2.10.1 - 2026-05-20
+
+### Fixed
+
+- Fix `Utils::modifyRequest()` with numeric header names
+
+## 2.10.0 - 2026-05-19
+
+### Changed
+
+- Harden `ServerRequest::fromGlobals()` against malformed `$_SERVER` values
+- Prevent custom stream metadata from affecting internal size handling
+- Throw when `StreamWrapper::getResource()` cannot create a resource
+- Preserve custom request implementations in `Utils::modifyRequest()`
+- Preserve custom URI implementations in `UriResolver::resolve()`
+- Make `Uri::__toString()` side-effect-free
+
+## 2.9.1 - 2026-05-19
+
+### Fixed
+
+- Fix parsing of relative path references containing a colon in a non-initial path segment
+- Fix `CachingStream::detach()` returning an incomplete resource before the decorated stream has been fully read
+- Fix `Message::bodySummary()` returning `null` when truncating printable UTF-8 bodies inside a multibyte character
+
 ## 2.9.0 - 2026-03-10
 
 ### Added

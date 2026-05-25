@@ -4,17 +4,19 @@
 
 namespace Alma\Vendor\Composer\Autoload;
 
-class ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67
+class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
 {
     public static $files = array (
-        'f1356847d256a93f7928631f13c85add' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'e3811edf620df906119dde7e62fb7164' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        'f1356847d256a93f7928631f13c85add' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
+        '1ca077f53716943ed824d66c26b73e2c' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '6672bcf5979dfbf039eef83608d74702' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'A' =>
         array (
+            'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\' => 35,
             'Alma\\Vendor\\Psr\\Log\\' => 20,
             'Alma\\Vendor\\Psr\\Http\\Message\\' => 29,
             'Alma\\Vendor\\Psr\\Http\\Client\\' => 28,
@@ -29,6 +31,10 @@ class ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67
     );
 
     public static $prefixDirsPsr4 = array (
+        'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\' =>
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
+        ),
         'Alma\\Vendor\\Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
@@ -383,6 +389,8 @@ class ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlFactoryInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlFactoryInterface.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlHandler.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlMultiHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php',
+        'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlShare' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlShare.php',
+        'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlShareHandleState' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlShareHandleState.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/MockHandler.php',
@@ -473,15 +481,22 @@ class ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67
         'Alma\\Vendor\\Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/DummyTest.php',
         'Alma\\Vendor\\Psr\\Log\\Test\\LoggerInterfaceTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
         'Alma\\Vendor\\Psr\\Log\\Test\\TestLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/TestLogger.php',
+        'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
+        'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Alma\\Vendor\\Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitce0d4d25961efdf9d4df749f7df23b67::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465::$classMap;
 
         }, null, ClassLoader::class);
     }

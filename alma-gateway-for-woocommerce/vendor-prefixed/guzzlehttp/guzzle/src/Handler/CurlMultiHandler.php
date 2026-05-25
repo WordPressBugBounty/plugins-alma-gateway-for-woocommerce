@@ -26,6 +26,11 @@ class CurlMultiHandler
     private $factory;
 
     /**
+     * @var CurlShareHandleState|null
+     */
+    private $shareHandleState;
+
+    /**
      * @var int
      */
     private $selectTimeout;
@@ -58,9 +63,20 @@ class CurlMultiHandler
     private $_mh;
 
     /**
+     * @var bool
+     */
+    private $executingMulti = false;
+
+    /**
+     * @var array<int, EasyHandle>
+     */
+    private $deferredCancels = [];
+
+    /**
      * This handler accepts the following options:
      *
      * - handle_factory: An optional factory  used to create curl handles
+     * - share: Optional cURL share-handle configuration.
      * - select_timeout: Optional timeout (in seconds) to block before timing
      *   out while selecting curl handles. Defaults to 1 second.
      * - options: An associative array of CURLMOPT_* options and
@@ -68,12 +84,22 @@ class CurlMultiHandler
      */
     public function __construct(array $options = [])
     {
-        $this->factory = $options['handle_factory'] ?? new CurlFactory(50);
+        CurlShareHandleState::assertNoCustomFactoryConflict($options, 'CurlMultiHandler');
+
+        $this->shareHandleState = CurlShareHandleState::fromOption($options['share'] ?? null);
+
+        if (\array_key_exists('handle_factory', $options) && $options['handle_factory'] !== null) {
+            $this->factory = $options['handle_factory'];
+        } elseif ($this->shareHandleState !== null) {
+            $this->factory = new CurlFactory(50, $this->shareHandleState->mode, $this->shareHandleState->handle);
+        } else {
+            $this->factory = new CurlFactory(50);
+        }
 
         if (isset($options['select_timeout'])) {
             $this->selectTimeout = $options['select_timeout'];
         } elseif ($selectTimeout = Utils::getenv('GUZZLE_CURL_SELECT_TIMEOUT')) {
-            @trigger_error('Since guzzlehttp/guzzle 7.2.0: Using environment variable GUZZLE_CURL_SELECT_TIMEOUT is deprecated. Use option "select_timeout" instead.', \Alma_Gateway_E_USER_DEPRECATED);
+            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.2', 'The GUZZLE_CURL_SELECT_TIMEOUT environment variable is deprecated; use the "select_timeout" option instead.');
             $this->selectTimeout = (int) $selectTimeout;
         } else {
             $this->selectTimeout = 1;
@@ -119,8 +145,13 @@ class CurlMultiHandler
     public function __destruct()
     {
         if (isset($this->_mh)) {
-            \curl_multi_close($this->_mh);
-            unset($this->_mh);
+            try {
+                \curl_multi_close($this->_mh);
+            } catch (\Throwable $e) {
+                // Destructors must not throw.
+            } finally {
+                unset($this->_mh);
+            }
         }
     }
 
@@ -172,10 +203,21 @@ class CurlMultiHandler
             \usleep(250);
         }
 
-        while (\curl_multi_exec($this->_mh, $this->active) === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
+        do {
+            $this->executingMulti = true;
+
+            try {
+                $exec = \curl_multi_exec($this->_mh, $this->active);
+            } finally {
+                $this->executingMulti = false;
+                $this->cleanupDeferredCancels();
+            }
+
             // Prevent busy looping for slow HTTP requests.
-            \curl_multi_select($this->_mh, $this->selectTimeout);
-        }
+            if ($exec === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
+                \curl_multi_select($this->_mh, $this->selectTimeout);
+            }
+        } while ($exec === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM);
 
         $this->processMessages();
     }
@@ -185,7 +227,16 @@ class CurlMultiHandler
      */
     private function tickInQueue(): void
     {
-        if (\curl_multi_exec($this->_mh, $this->active) === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
+        $this->executingMulti = true;
+
+        try {
+            $exec = \curl_multi_exec($this->_mh, $this->active);
+        } finally {
+            $this->executingMulti = false;
+            $this->cleanupDeferredCancels();
+        }
+
+        if ($exec === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
             \curl_multi_select($this->_mh, 0);
             P\Utils::queue()->add(Closure::fromCallable([$this, 'tickInQueue']));
         }
@@ -229,7 +280,7 @@ class CurlMultiHandler
     private function cancel($id): bool
     {
         if (!is_int($id)) {
-            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.4', 'Not passing an integer to %s::%s() is deprecated and will cause an error in 8.0.', __CLASS__, __FUNCTION__);
+            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.4', 'Not passing an int to %s::%s() is deprecated and will cause an error in 8.0.', __CLASS__, __FUNCTION__);
         }
 
         // Cannot cancel if it has been processed.
@@ -237,15 +288,42 @@ class CurlMultiHandler
             return false;
         }
 
-        $handle = $this->handles[$id]['easy']->handle;
+        $easy = $this->handles[$id]['easy'];
         unset($this->delays[$id], $this->handles[$id]);
+
+        if ($this->executingMulti) {
+            $this->deferredCancels[$id] = $easy;
+
+            return true;
+        }
+
+        $this->cleanupCancelledHandle($easy);
+
+        return true;
+    }
+
+    private function cleanupDeferredCancels(): void
+    {
+        if ($this->deferredCancels === []) {
+            return;
+        }
+
+        $entries = $this->deferredCancels;
+        $this->deferredCancels = [];
+
+        foreach ($entries as $easy) {
+            $this->cleanupCancelledHandle($easy);
+        }
+    }
+
+    private function cleanupCancelledHandle(EasyHandle $easy): void
+    {
+        $handle = $easy->handle;
         \curl_multi_remove_handle($this->_mh, $handle);
 
         if (PHP_VERSION_ID < 80000) {
             \curl_close($handle);
         }
-
-        return true;
     }
 
     private function processMessages(): void
@@ -253,6 +331,12 @@ class CurlMultiHandler
         while ($done = \curl_multi_info_read($this->_mh)) {
             if ($done['msg'] !== \Alma_Gateway_CURLMSG_DONE) {
                 // if it's not done, then it would be premature to remove the handle. ref https://github.com/guzzle/guzzle/pull/2892#issuecomment-945150216
+                continue;
+            }
+            if (!isset($done['handle'])) {
+                // Work around a PHP issue where cancelled transfers may omit the handle.
+                // Remove this once we no longer support PHP versions before the fix in
+                // https://github.com/php/php-src/pull/16302.
                 continue;
             }
             $id = (int) $done['handle'];

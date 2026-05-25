@@ -5,6 +5,8 @@ namespace Alma\Vendor\GuzzleHttp;
 use Alma\Vendor\GuzzleHttp\Cookie\CookieJar;
 use Alma\Vendor\GuzzleHttp\Exception\GuzzleException;
 use Alma\Vendor\GuzzleHttp\Exception\InvalidArgumentException;
+use Alma\Vendor\GuzzleHttp\Handler\CurlShare;
+use Alma\Vendor\GuzzleHttp\Handler\CurlShareHandleState;
 use Alma\Vendor\GuzzleHttp\Promise as P;
 use Alma\Vendor\GuzzleHttp\Promise\PromiseInterface;
 use Alma\Vendor\Psr\Http\Message\RequestInterface;
@@ -45,6 +47,8 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      *   default middleware to the handler.
      * - base_uri: (string|UriInterface) Base URI of the client that is merged
      *   into relative URIs. Can be a string or instance of UriInterface.
+     * - curl_share: (string|null) cURL share-handle configuration for the
+     *   default cURL handler. Defaults to null.
      * - **: any request option
      *
      * @param array $config Client configuration settings.
@@ -53,10 +57,15 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      */
     public function __construct(array $config = [])
     {
+        $curlShare = \array_key_exists('curl_share', $config) ? $config['curl_share'] : null;
+        $curlShareMode = CurlShareHandleState::normalizeMode($curlShare, 'curl_share');
+        unset($config['curl_share']);
         if (!isset($config['handler'])) {
-            $config['handler'] = HandlerStack::create();
+            $config['handler'] = $curlShareMode === CurlShare::NONE ? HandlerStack::create() : HandlerStack::create(Utils::chooseHandler(['share' => $curlShareMode]));
         } elseif (!\is_callable($config['handler'])) {
             throw new InvalidArgumentException('handler must be a callable');
+        } elseif ($curlShareMode !== CurlShare::NONE) {
+            throw new InvalidArgumentException('The "curl_share" client option can only be used when Guzzle creates the default handler. Configure the "share" option on CurlHandler or CurlMultiHandler when providing a custom cURL handler.');
         }
         // Convert the base_uri to a UriInterface
         if (isset($config['base_uri'])) {
@@ -79,13 +88,16 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
         }
         $uri = $args[0];
         $opts = $args[1] ?? [];
-        return \substr($method, -5) === 'Async' ? $this->requestAsync(\substr($method, 0, -5), $uri, $opts) : $this->request($method, $uri, $opts);
+        $isAsync = \substr($method, -5) === 'Async';
+        $method = $isAsync ? \substr($method, 0, -5) : $method;
+        $method = \strtoupper($method);
+        return $isAsync ? $this->requestAsync($method, $uri, $opts) : $this->request($method, $uri, $opts);
     }
     /**
      * Asynchronously send an HTTP request.
      *
      * @param array $options Request options to apply to the given
-     *                       request and to the transfer. See \GuzzleHttp\RequestOptions.
+     *                       request and to the transfer. See {@see RequestOptions}.
      */
     public function sendAsync(RequestInterface $request, array $options = []): PromiseInterface
     {
@@ -97,7 +109,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      * Send an HTTP request.
      *
      * @param array $options Request options to apply to the given
-     *                       request and to the transfer. See \GuzzleHttp\RequestOptions.
+     *                       request and to the transfer. See {@see RequestOptions}.
      *
      * @throws GuzzleException
      */
@@ -128,7 +140,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      *
      * @param string              $method  HTTP method
      * @param string|UriInterface $uri     URI object or string.
-     * @param array               $options Request options to apply. See \GuzzleHttp\RequestOptions.
+     * @param array               $options Request options to apply. See {@see RequestOptions}.
      */
     public function requestAsync(string $method, $uri = '', array $options = []): PromiseInterface
     {
@@ -136,7 +148,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
         // Remove request modifying parameter because it can be done up-front.
         $headers = $options['headers'] ?? [];
         $body = $options['body'] ?? null;
-        $version = $options['version'] ?? '1.1';
+        $version = self::normalizeProtocolVersion($options['version'] ?? '1.1');
         // Merge the URI into the base URI.
         $uri = $this->buildUri(\Alma\Vendor\GuzzleHttp\Psr7\Utils::uriFor($uri), $options);
         if (\is_array($body)) {
@@ -156,7 +168,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      *
      * @param string              $method  HTTP method.
      * @param string|UriInterface $uri     URI object or string.
-     * @param array               $options Request options to apply. See \GuzzleHttp\RequestOptions.
+     * @param array               $options Request options to apply. See {@see RequestOptions}.
      *
      * @throws GuzzleException
      */
@@ -175,8 +187,6 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      * @param string|null $option The config option to retrieve.
      *
      * @return mixed
-     *
-     * @deprecated Client::getConfig will be removed in guzzlehttp/guzzle:8.0.
      */
     public function getConfig(?string $option = null)
     {
@@ -187,8 +197,8 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
         if (isset($config['base_uri'])) {
             $uri = \Alma\Vendor\GuzzleHttp\Psr7\UriResolver::resolve(\Alma\Vendor\GuzzleHttp\Psr7\Utils::uriFor($config['base_uri']), $uri);
         }
-        if (isset($config['idn_conversion']) && $config['idn_conversion'] !== false) {
-            $idnOptions = $config['idn_conversion'] === true ? \IDNA_DEFAULT : $config['idn_conversion'];
+        $idnOptions = Utils::normalizeIdnConversionOption($config['idn_conversion'] ?? null);
+        if ($idnOptions !== null) {
             $uri = Utils::idnUriConvert($uri, $idnOptions);
         }
         return $uri->getScheme() === '' && $uri->getHost() !== '' ? $uri->withScheme('http') : $uri;
@@ -198,7 +208,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      */
     private function configureDefaults(array $config): void
     {
-        $defaults = ['allow_redirects' => RedirectMiddleware::$defaultSettings, 'http_errors' => true, 'decode_content' => true, 'verify' => true, 'cookies' => false, 'idn_conversion' => false];
+        $defaults = ['allow_redirects' => RedirectMiddleware::$defaultSettings, 'http_errors' => true, 'decode_content' => true, 'verify' => true, 'cookies' => false, 'idn_conversion' => false, 'protocols' => ['http', 'https']];
         // Use the standard Linux HTTP_PROXY and HTTPS_PROXY if set.
         // We can only trust the HTTP_PROXY environment variable in a CLI
         // process due to the fact that PHP has no reliable mechanism to
@@ -223,7 +233,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
         } else {
             // Add the User-Agent header if one was not already set.
             foreach (\array_keys($this->config['headers']) as $name) {
-                if (\strtolower($name) === 'user-agent') {
+                if (\strtolower((string) $name) === 'user-agent') {
                     return;
                 }
             }
@@ -270,11 +280,18 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      * The URI of the request is not modified and the request options are used
      * as-is without merging in default options.
      *
-     * @param array $options See \GuzzleHttp\RequestOptions.
+     * @param array $options See {@see RequestOptions}.
      */
     private function transfer(RequestInterface $request, array $options): PromiseInterface
     {
         $request = $this->applyOptions($request, $options);
+        $protocolVersion = $request->getProtocolVersion();
+        if ('' === $protocolVersion) {
+            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.11', 'Sending a request with an empty protocol version is deprecated; guzzlehttp/guzzle 8.0 will reject empty protocol versions.');
+            $request = \Alma\Vendor\GuzzleHttp\Psr7\Utils::modifyRequest($request, ['version' => '1.1']);
+        } elseif (!self::isProtocolVersionValid($protocolVersion)) {
+            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.11', 'Sending a request with a malformed protocol version is deprecated; guzzlehttp/guzzle 8.0 will reject malformed protocol versions.');
+        }
         /** @var HandlerStack $handler */
         $handler = $options['handler'];
         try {
@@ -320,7 +337,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
         if (!empty($options['decode_content']) && $options['decode_content'] !== true) {
             // Ensure that we don't have the header in different case and set the new value.
             $options['_conditional'] = \Alma\Vendor\GuzzleHttp\Psr7\Utils::caselessRemove(['Accept-Encoding'], $options['_conditional']);
-            $modify['set_headers']['Accept-Encoding'] = $options['decode_content'];
+            $modify['set_headers']['Accept-Encoding'] = (string) $options['decode_content'];
         }
         if (isset($options['body'])) {
             if (\is_array($options['body'])) {
@@ -368,7 +385,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
             }
         }
         if (isset($options['version'])) {
-            $modify['version'] = $options['version'];
+            $modify['version'] = self::normalizeProtocolVersion($options['version']);
         }
         $request = \Alma\Vendor\GuzzleHttp\Psr7\Utils::modifyRequest($request, $modify);
         if ($request->getBody() instanceof \Alma\Vendor\GuzzleHttp\Psr7\MultipartStream) {
@@ -382,8 +399,9 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
             // Build up the changes so it's in a single clone of the message.
             $modify = [];
             foreach ($options['_conditional'] as $k => $v) {
-                if (!$request->hasHeader($k)) {
-                    $modify['set_headers'][$k] = $v;
+                $name = (string) $k;
+                if (!$request->hasHeader($name)) {
+                    $modify['set_headers'][$name] = $v;
                 }
             }
             $request = \Alma\Vendor\GuzzleHttp\Psr7\Utils::modifyRequest($request, $modify);
@@ -391,6 +409,21 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
             unset($options['_conditional']);
         }
         return $request;
+    }
+    /**
+     * @param string|float $version
+     */
+    private static function normalizeProtocolVersion($version): string
+    {
+        if ('' === $version) {
+            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.11', 'Passing an empty "version" request option is deprecated; guzzlehttp/guzzle 8.0 will reject empty protocol versions.');
+            return '1.1';
+        }
+        return \is_float($version) ? \number_format($version, 1, '.', '') : (string) $version;
+    }
+    private static function isProtocolVersionValid(string $version): bool
+    {
+        return 1 === \preg_match('/^\d+(?:\.\d+)?$/D', $version);
     }
     /**
      * Return an InvalidArgumentException with pre-set message.

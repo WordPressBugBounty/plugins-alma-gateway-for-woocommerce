@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Alma\Vendor\GuzzleHttp\Psr7;
 
 use Alma\Vendor\Psr\Http\Message\RequestInterface;
-use Alma\Vendor\Psr\Http\Message\ServerRequestInterface;
 use Alma\Vendor\Psr\Http\Message\StreamInterface;
 use Alma\Vendor\Psr\Http\Message\UriInterface;
 
@@ -50,9 +49,12 @@ final class Utils
 
         if ($maxLen === -1) {
             while (!$source->eof()) {
-                if (!$dest->write($source->read($bufferSize))) {
+                $buf = $source->read($bufferSize);
+                if ($buf === '') {
                     break;
                 }
+
+                self::writeAll($dest, $buf);
             }
         } else {
             $remaining = $maxLen;
@@ -63,8 +65,23 @@ final class Utils
                     break;
                 }
                 $remaining -= $len;
-                $dest->write($buf);
+                self::writeAll($dest, $buf);
             }
+        }
+    }
+
+    private static function writeAll(StreamInterface $dest, string $buf): void
+    {
+        $written = 0;
+        $len = strlen($buf);
+
+        while ($written < $len) {
+            $result = $dest->write(substr($buf, $written));
+            if ($result <= 0) {
+                throw new \RuntimeException('Unable to write to stream');
+            }
+
+            $written += $result;
         }
     }
 
@@ -148,7 +165,10 @@ final class Utils
      * - method: (string) Changes the HTTP method.
      * - set_headers: (array) Sets the given headers.
      * - remove_headers: (array) Remove the given headers.
-     * - body: (mixed) Sets the given body.
+     * - body: (mixed) Sets the given body. Present non-null values are converted
+     *   with self::streamFor(), including scalar values, resources, streams,
+     *   iterators, callable arrays, closures, invokable objects, and objects
+     *   with __toString(). String inputs remain literal bodies.
      * - uri: (UriInterface) Set the URI.
      * - query: (string) Set the query string value of the URI.
      * - version: (string) Set the protocol version.
@@ -195,34 +215,68 @@ final class Utils
             $uri = $uri->withQuery($changes['query']);
         }
 
-        if ($request instanceof ServerRequestInterface) {
-            $new = (new ServerRequest(
-                $changes['method'] ?? $request->getMethod(),
-                $uri,
-                $headers,
-                $changes['body'] ?? $request->getBody(),
-                $changes['version'] ?? $request->getProtocolVersion(),
-                $request->getServerParams()
-            ))
-            ->withParsedBody($request->getParsedBody())
-            ->withQueryParams($request->getQueryParams())
-            ->withCookieParams($request->getCookieParams())
-            ->withUploadedFiles($request->getUploadedFiles());
-
-            foreach ($request->getAttributes() as $key => $value) {
-                $new = $new->withAttribute($key, $value);
+        $hasHost = false;
+        foreach (array_keys($headers) as $header) {
+            if (strtolower((string) $header) === 'host') {
+                $hasHost = true;
+                break;
             }
-
-            return $new;
         }
 
-        return new Request(
-            $changes['method'] ?? $request->getMethod(),
-            $uri,
-            $headers,
-            $changes['body'] ?? $request->getBody(),
-            $changes['version'] ?? $request->getProtocolVersion()
-        );
+        // Match Request::__construct() by adding a Host header when one is not provided.
+        if (!$hasHost && $uri->getHost() !== '') {
+            $host = $uri->getHost();
+
+            if (($port = $uri->getPort()) !== null) {
+                $host .= ':'.$port;
+            }
+
+            $headers = ['Host' => [$host]] + $headers;
+        }
+
+        $new = $request;
+
+        if (isset($changes['method'])) {
+            $new = $new->withMethod($changes['method']);
+        }
+
+        if (isset($changes['uri']) || isset($changes['query'])) {
+            $new = $new->withUri($uri, true);
+        }
+
+        if ($headers !== $new->getHeaders()) {
+            foreach (array_keys($new->getHeaders()) as $header) {
+                /** @var RequestInterface */
+                $new = $new->withoutHeader((string) $header);
+            }
+
+            $addedHeaders = [];
+            foreach ($headers as $header => $value) {
+                $header = (string) $header;
+                $normalized = strtolower($header);
+
+                if (isset($addedHeaders[$normalized])) {
+                    /** @var RequestInterface */
+                    $new = $new->withAddedHeader($addedHeaders[$normalized], $value);
+                } else {
+                    /** @var RequestInterface */
+                    $new = $new->withHeader($header, $value);
+                    $addedHeaders[$normalized] = $header;
+                }
+            }
+        }
+
+        if (isset($changes['body'])) {
+            /** @var RequestInterface */
+            $new = $new->withBody(self::streamFor($changes['body']));
+        }
+
+        if (isset($changes['version'])) {
+            /** @var RequestInterface */
+            $new = $new->withProtocolVersion($changes['version']);
+        }
+
+        return $new;
     }
 
     /**
@@ -285,13 +339,14 @@ final class Utils
      *   the object will be cast to a string and then a stream will be returned that
      *   uses the string value.
      * - `NULL`: When `null` is passed, an empty stream object is returned.
-     * - `callable` When a callable is passed, a read-only stream object will be
-     *   created that invokes the given callable. The callable is invoked with the
-     *   number of suggested bytes to read. The callable can return any number of
-     *   bytes, but MUST return `false` when there is no more data to return. The
-     *   stream object that wraps the callable will invoke the callable until the
-     *   number of requested bytes are available. Any additional bytes will be
-     *   buffered and used in subsequent reads.
+     * - `callable`: When a callable array, closure, or invokable object is passed
+     *   and no earlier resource or object rule applies, a read-only stream object
+     *   will be created that invokes the given callable. The callable is invoked
+     *   with the suggested number of bytes to read. The callable can return fewer
+     *   or more bytes than requested, but MUST return `false` or `null` when there
+     *   is no more data to return. Any additional bytes will be buffered and used
+     *   in subsequent reads. String inputs are always treated as string bodies,
+     *   even when they name callable functions.
      *
      * @param resource|string|int|float|bool|StreamInterface|callable|\Iterator|null $resource Entity body data
      * @param array{size?: int, metadata?: array}                                    $options  Additional options
