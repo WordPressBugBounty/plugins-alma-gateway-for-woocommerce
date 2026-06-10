@@ -74,6 +74,9 @@ class Uri implements UriInterface, \JsonSerializable
     /** @var string Uri fragment. */
     private $fragment = '';
 
+    /** @var string|null String representation */
+    private $composedComponents;
+
     public function __construct(string $uri = '')
     {
         if ($uri !== '') {
@@ -102,10 +105,6 @@ class Uri implements UriInterface, \JsonSerializable
      */
     private static function parse(string $url)
     {
-        if (self::isPathNoSchemeReference($url)) {
-            return self::parsePathNoSchemeReference($url);
-        }
-
         // If IPv6
         $prefix = '';
         if (preg_match('%^(.*://\[[0-9:a-fA-F]+\])(.*?)$%', $url, $matches)) {
@@ -132,48 +131,19 @@ class Uri implements UriInterface, \JsonSerializable
         return array_map('urldecode', $result);
     }
 
-    private static function isPathNoSchemeReference(string $url): bool
-    {
-        if ($url === '' || $url[0] === '/' || $url[0] === '?' || $url[0] === '#') {
-            return false;
-        }
-
-        $firstSegment = substr($url, 0, strcspn($url, '/?#'));
-
-        return strpos($firstSegment, ':') === false;
-    }
-
-    /**
-     * @return array{path: string, query?: string, fragment?: string}
-     */
-    private static function parsePathNoSchemeReference(string $url): array
-    {
-        $parts = [];
-
-        if (false !== ($fragmentPosition = strpos($url, '#'))) {
-            $parts['fragment'] = substr($url, $fragmentPosition + 1);
-            $url = substr($url, 0, $fragmentPosition);
-        }
-
-        if (false !== ($queryPosition = strpos($url, '?'))) {
-            $parts['query'] = substr($url, $queryPosition + 1);
-            $url = substr($url, 0, $queryPosition);
-        }
-
-        $parts['path'] = $url;
-
-        return $parts;
-    }
-
     public function __toString(): string
     {
-        return self::composeComponents(
-            $this->scheme,
-            $this->getAuthority(),
-            $this->path,
-            $this->query,
-            $this->fragment
-        );
+        if ($this->composedComponents === null) {
+            $this->composedComponents = self::composeComponents(
+                $this->scheme,
+                $this->getAuthority(),
+                $this->path,
+                $this->query,
+                $this->fragment
+            );
+        }
+
+        return $this->composedComponents;
     }
 
     /**
@@ -455,6 +425,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->scheme = $scheme;
+        $new->composedComponents = null;
         $new->removeDefaultPort();
         $new->validateState();
 
@@ -474,6 +445,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->userInfo = $info;
+        $new->composedComponents = null;
         $new->validateState();
 
         return $new;
@@ -489,6 +461,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->host = $host;
+        $new->composedComponents = null;
         $new->validateState();
 
         return $new;
@@ -496,15 +469,6 @@ class Uri implements UriInterface, \JsonSerializable
 
     public function withPort($port): UriInterface
     {
-        if ($port !== null && !\is_int($port)) {
-            alma_gateway_trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing %s to UriInterface::withPort() is deprecated; guzzlehttp/psr7 3.0 requires int|null.',
-                \get_debug_type($port)
-            );
-        }
-
         $port = $this->filterPort($port);
 
         if ($this->port === $port) {
@@ -513,6 +477,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->port = $port;
+        $new->composedComponents = null;
         $new->removeDefaultPort();
         $new->validateState();
 
@@ -529,6 +494,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->path = $path;
+        $new->composedComponents = null;
         $new->validateState();
 
         return $new;
@@ -544,6 +510,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->query = $query;
+        $new->composedComponents = null;
 
         return $new;
     }
@@ -558,6 +525,7 @@ class Uri implements UriInterface, \JsonSerializable
 
         $new = clone $this;
         $new->fragment = $fragment;
+        $new->composedComponents = null;
 
         return $new;
     }
@@ -613,18 +581,7 @@ class Uri implements UriInterface, \JsonSerializable
             throw new \InvalidArgumentException('Scheme must be a string');
         }
 
-        $scheme = \strtr($scheme, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
-
-        if ($scheme !== '' && !preg_match('/^[a-z][a-z0-9.+-]*$/D', $scheme)) {
-            alma_gateway_trigger_deprecation(
-                'guzzlehttp/psr7',
-                '2.11',
-                'Passing "%s" as a URI scheme is deprecated; guzzlehttp/psr7 3.0 requires URI schemes to match RFC 3986 syntax and begin with a letter.',
-                $scheme
-            );
-        }
-
-        return $scheme;
+        return \strtr($scheme, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz');
     }
 
     /**

@@ -4,19 +4,17 @@
 
 namespace Alma\Vendor\Composer\Autoload;
 
-class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
+class ComposerStaticInit1660f2863c2f83d1df3460ef53a34250
 {
     public static $files = array (
-        'e3811edf620df906119dde7e62fb7164' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         'f1356847d256a93f7928631f13c85add' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        '1ca077f53716943ed824d66c26b73e2c' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        'e3811edf620df906119dde7e62fb7164' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '6672bcf5979dfbf039eef83608d74702' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
     );
 
     public static $prefixLengthsPsr4 = array (
         'A' =>
         array (
-            'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\' => 35,
             'Alma\\Vendor\\Psr\\Log\\' => 20,
             'Alma\\Vendor\\Psr\\Http\\Message\\' => 29,
             'Alma\\Vendor\\Psr\\Http\\Client\\' => 28,
@@ -31,10 +29,6 @@ class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
     );
 
     public static $prefixDirsPsr4 = array (
-        'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\' =>
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
-        ),
         'Alma\\Vendor\\Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
@@ -132,6 +126,7 @@ class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
         'Alma\\Gateway\\Application\\Provider\\ProviderInterface' => __DIR__ . '/../..' . '/includes/Application/Provider/ProviderInterface.php',
         'Alma\\Gateway\\Application\\Service\\AuthenticationService' => __DIR__ . '/../..' . '/includes/Application/Service/AuthenticationService.php',
         'Alma\\Gateway\\Application\\Service\\BusinessEventsService' => __DIR__ . '/../..' . '/includes/Application/Service/BusinessEventsService.php',
+        'Alma\\Gateway\\Application\\Service\\CollectCmsDataService' => __DIR__ . '/../..' . '/includes/Application/Service/CollectCmsDataService.php',
         'Alma\\Gateway\\Application\\Service\\ConfigService' => __DIR__ . '/../..' . '/includes/Application/Service/ConfigService.php',
         'Alma\\Gateway\\Application\\Service\\FraudService' => __DIR__ . '/../..' . '/includes/Application/Service/FraudService.php',
         'Alma\\Gateway\\Application\\Service\\GatewayConfigurationFormValidatorService' => __DIR__ . '/../..' . '/includes/Application/Service/GatewayConfigurationFormValidatorService.php',
@@ -163,6 +158,7 @@ class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
         'Alma\\Gateway\\Infrastructure\\Block\\Widget\\WidgetBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Widget/WidgetBlock.php',
         'Alma\\Gateway\\Infrastructure\\Config\\AssetsConfig' => __DIR__ . '/../..' . '/includes/Infrastructure/Config/AssetsConfig.php',
         'Alma\\Gateway\\Infrastructure\\Controller\\AdminController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/AdminController.php',
+        'Alma\\Gateway\\Infrastructure\\Controller\\CollectCmsDataController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/CollectCmsDataController.php',
         'Alma\\Gateway\\Infrastructure\\Controller\\GatewayController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/GatewayController.php',
         'Alma\\Gateway\\Infrastructure\\Controller\\ShopController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/ShopController.php',
         'Alma\\Gateway\\Infrastructure\\Dto\\FeePlanDto' => __DIR__ . '/../..' . '/includes/Infrastructure/Dto/FeePlanDto.php',
@@ -209,6 +205,7 @@ class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
         'Alma\\Gateway\\Infrastructure\\Helper\\BlocksWidgetHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/BlocksWidgetHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\CartHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CartHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\CmsHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CmsHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\CollectCmsDataHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CollectCmsDataHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\ContextHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/ContextHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\CoreHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CoreHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\EventHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/EventHelper.php',
@@ -389,8 +386,6 @@ class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlFactoryInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlFactoryInterface.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlHandler.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlMultiHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php',
-        'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlShare' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlShare.php',
-        'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlShareHandleState' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlShareHandleState.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/MockHandler.php',
@@ -481,22 +476,15 @@ class ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465
         'Alma\\Vendor\\Psr\\Log\\Test\\DummyTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/DummyTest.php',
         'Alma\\Vendor\\Psr\\Log\\Test\\LoggerInterfaceTest' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/LoggerInterfaceTest.php',
         'Alma\\Vendor\\Psr\\Log\\Test\\TestLogger' => __DIR__ . '/..' . '/psr/log/Psr/Log/Test/TestLogger.php',
-        'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
-        'Alma\\Vendor\\Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
-        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Alma\\Vendor\\Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
-        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
-        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitedd4a9e9f951deb289f37bb7f330f465::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit1660f2863c2f83d1df3460ef53a34250::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit1660f2863c2f83d1df3460ef53a34250::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit1660f2863c2f83d1df3460ef53a34250::$classMap;
 
         }, null, ClassLoader::class);
     }

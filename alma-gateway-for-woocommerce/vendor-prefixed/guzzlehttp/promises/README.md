@@ -53,7 +53,7 @@ why the promise cannot be fulfilled.
 
 ### Callbacks
 
-Callbacks are registered with the `then` method by providing an optional
+Callbacks are registered with the `then` method by providing an optional 
 `$onFulfilled` followed by an optional `$onRejected` function.
 
 
@@ -323,11 +323,9 @@ assert('waited' === $promise->wait());
 
 A promise has the following methods:
 
-- `then(?callable $onFulfilled = null, ?callable $onRejected = null) : PromiseInterface`
-
-  Appends fulfillment and rejection handlers to the promise, and returns a new
-  promise resolving to the return value of the called handler. If a handler is
-  omitted, the original fulfillment value or rejection reason is forwarded.
+- `then(callable $onFulfilled, callable $onRejected) : PromiseInterface`
+  
+  Appends fulfillment and rejection handlers to the promise, and returns a new promise resolving to the return value of the called handler.
 
 - `otherwise(callable $onRejected) : PromiseInterface`
   
@@ -440,13 +438,11 @@ $queue = GuzzleHttp\Promise\Utils::queue();
 $queue->run();
 ```
 
-For example, you could use Guzzle promises with React using a short periodic
-timer. Avoid zero-interval timers because they may keep the loop busy even when
-there is no promise work to run.
+For example, you could use Guzzle promises with React using a periodic timer:
 
 ```php
 $loop = React\EventLoop\Factory::create();
-$loop->addPeriodicTimer(0.01, [$queue, 'run']);
+$loop->addPeriodicTimer(0, [$queue, 'run']);
 ```
 
 
@@ -514,9 +510,36 @@ $promise->resolve('foo');
 ```
 
 
-## Upgrading
+## Upgrading from Function API
 
-See [UPGRADING.md](UPGRADING.md) for package upgrade notes.
+A static API was first introduced in 1.4.0, in order to mitigate problems with
+functions conflicting between global and local copies of the package. The
+function API was removed in 2.0.0. A migration table has been provided here for
+your convenience:
+
+| Original Function | Replacement Method |
+|----------------|----------------|
+| `queue` | `Utils::queue` |
+| `task` | `Utils::task` |
+| `promise_for` | `Create::promiseFor` |
+| `rejection_for` | `Create::rejectionFor` |
+| `exception_for` | `Create::exceptionFor` |
+| `iter_for` | `Create::iterFor` |
+| `inspect` | `Utils::inspect` |
+| `inspect_all` | `Utils::inspectAll` |
+| `unwrap` | `Utils::unwrap` |
+| `all` | `Utils::all` |
+| `some` | `Utils::some` |
+| `any` | `Utils::any` |
+| `settle` | `Utils::settle` |
+| `each` | `Each::of` |
+| `each_limit` | `Each::ofLimit` |
+| `each_limit_all` | `Each::ofLimitAll` |
+| `!is_fulfilled` | `Is::pending` |
+| `is_fulfilled` | `Is::fulfilled` |
+| `is_rejected` | `Is::rejected` |
+| `is_settled` | `Is::settled` |
+| `coroutine` | `Coroutine::of` |
 
 
 ## Security

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b
+class ComposerStaticInit669a883a67cee7415dc5d88a4522adea
 {
     public static $prefixLengthsPsr4 = array (
         'A' => 
@@ -74,6 +74,7 @@ class ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b
         'Alma\\Gateway\\Application\\Provider\\ProviderInterface' => __DIR__ . '/../..' . '/includes/Application/Provider/ProviderInterface.php',
         'Alma\\Gateway\\Application\\Service\\AuthenticationService' => __DIR__ . '/../..' . '/includes/Application/Service/AuthenticationService.php',
         'Alma\\Gateway\\Application\\Service\\BusinessEventsService' => __DIR__ . '/../..' . '/includes/Application/Service/BusinessEventsService.php',
+        'Alma\\Gateway\\Application\\Service\\CollectCmsDataService' => __DIR__ . '/../..' . '/includes/Application/Service/CollectCmsDataService.php',
         'Alma\\Gateway\\Application\\Service\\ConfigService' => __DIR__ . '/../..' . '/includes/Application/Service/ConfigService.php',
         'Alma\\Gateway\\Application\\Service\\FraudService' => __DIR__ . '/../..' . '/includes/Application/Service/FraudService.php',
         'Alma\\Gateway\\Application\\Service\\GatewayConfigurationFormValidatorService' => __DIR__ . '/../..' . '/includes/Application/Service/GatewayConfigurationFormValidatorService.php',
@@ -105,6 +106,7 @@ class ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b
         'Alma\\Gateway\\Infrastructure\\Block\\Widget\\WidgetBlock' => __DIR__ . '/../..' . '/includes/Infrastructure/Block/Widget/WidgetBlock.php',
         'Alma\\Gateway\\Infrastructure\\Config\\AssetsConfig' => __DIR__ . '/../..' . '/includes/Infrastructure/Config/AssetsConfig.php',
         'Alma\\Gateway\\Infrastructure\\Controller\\AdminController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/AdminController.php',
+        'Alma\\Gateway\\Infrastructure\\Controller\\CollectCmsDataController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/CollectCmsDataController.php',
         'Alma\\Gateway\\Infrastructure\\Controller\\GatewayController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/GatewayController.php',
         'Alma\\Gateway\\Infrastructure\\Controller\\ShopController' => __DIR__ . '/../..' . '/includes/Infrastructure/Controller/ShopController.php',
         'Alma\\Gateway\\Infrastructure\\Dto\\FeePlanDto' => __DIR__ . '/../..' . '/includes/Infrastructure/Dto/FeePlanDto.php',
@@ -151,6 +153,7 @@ class ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b
         'Alma\\Gateway\\Infrastructure\\Helper\\BlocksWidgetHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/BlocksWidgetHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\CartHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CartHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\CmsHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CmsHelper.php',
+        'Alma\\Gateway\\Infrastructure\\Helper\\CollectCmsDataHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CollectCmsDataHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\ContextHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/ContextHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\CoreHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/CoreHelper.php',
         'Alma\\Gateway\\Infrastructure\\Helper\\EventHelper' => __DIR__ . '/../..' . '/includes/Infrastructure/Helper/EventHelper.php',
@@ -195,9 +198,9 @@ class ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit4bab4355ebd2c3d573d0634b5451e85b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit669a883a67cee7415dc5d88a4522adea::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit669a883a67cee7415dc5d88a4522adea::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit669a883a67cee7415dc5d88a4522adea::$classMap;
 
         }, null, ClassLoader::class);
     }
