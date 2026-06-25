@@ -28,38 +28,38 @@
     ),
     'guzzlehttp/guzzle' => 
     array (
-      'pretty_version' => '7.10.x-dev',
-      'version' => '7.10.9999999.9999999-dev',
+      'pretty_version' => '7.13.x-dev',
+      'version' => '7.13.9999999.9999999-dev',
       'type' => 'library',
       'install_path' => __DIR__ . '/../guzzlehttp/guzzle',
       'aliases' => 
       array (
       ),
-      'reference' => 'fb92d95f80a9da51bf8f2a5b26d8e8ea3b6d99ed',
+      'reference' => '6e4dc82771ff4981153af4bb061f47af16c31f4d',
       'dev_requirement' => false,
     ),
     'guzzlehttp/promises' => 
     array (
-      'pretty_version' => '2.3.x-dev',
-      'version' => '2.3.9999999.9999999-dev',
+      'pretty_version' => '2.5.x-dev',
+      'version' => '2.5.9999999.9999999-dev',
       'type' => 'library',
       'install_path' => __DIR__ . '/../guzzlehttp/promises',
       'aliases' => 
       array (
       ),
-      'reference' => '74c1b7186ecda8058c8958a1b2d3e8ef4419a84e',
+      'reference' => '4360e982f87f5f258bf872d094647791db2f4c8e',
       'dev_requirement' => false,
     ),
     'guzzlehttp/psr7' => 
     array (
-      'pretty_version' => '2.9.x-dev',
-      'version' => '2.9.9999999.9999999-dev',
+      'pretty_version' => '2.12.x-dev',
+      'version' => '2.12.9999999.9999999-dev',
       'type' => 'library',
       'install_path' => __DIR__ . '/../guzzlehttp/psr7',
       'aliases' => 
       array (
       ),
-      'reference' => '7d0ed42f28e42d61352a7a79de682e5e67fec884',
+      'reference' => '7ec62dc3f44aa218487dbed81a9bf9bc647be55d',
       'dev_requirement' => false,
     ),
     'level-2/dice' => 
@@ -146,6 +146,18 @@
       array (
       ),
       'reference' => '605389f2a7e5625f273b53960dc46aeaf9c62918',
+      'dev_requirement' => false,
+    ),
+    'symfony/polyfill-php80' => 
+    array (
+      'pretty_version' => '1.x-dev',
+      'version' => '1.9999999.9999999.9999999-dev',
+      'type' => 'library',
+      'install_path' => __DIR__ . '/../symfony/polyfill-php80',
+      'aliases' => 
+      array (
+      ),
+      'reference' => 'dfb55726c3a76ea3b6459fcfda1ec2d80a682411',
       'dev_requirement' => false,
     ),
   ),
