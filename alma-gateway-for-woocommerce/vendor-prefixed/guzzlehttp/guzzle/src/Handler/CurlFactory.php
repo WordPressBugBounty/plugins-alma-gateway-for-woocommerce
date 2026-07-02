@@ -7,11 +7,8 @@ use Alma\Vendor\GuzzleHttp\Exception\RequestException;
 use Alma\Vendor\GuzzleHttp\Promise as P;
 use Alma\Vendor\GuzzleHttp\Promise\FulfilledPromise;
 use Alma\Vendor\GuzzleHttp\Promise\PromiseInterface;
-use Alma\Vendor\GuzzleHttp\Psr7;
 use Alma\Vendor\GuzzleHttp\Psr7\LazyOpenStream;
-use Alma\Vendor\GuzzleHttp\Psr7\Uri;
 use Alma\Vendor\GuzzleHttp\TransferStats;
-use Alma\Vendor\GuzzleHttp\TransportSharing;
 use Alma\Vendor\GuzzleHttp\Utils;
 use Alma\Vendor\Psr\Http\Message\RequestInterface;
 use Alma\Vendor\Psr\Http\Message\UriInterface;
@@ -25,8 +22,6 @@ class CurlFactory implements CurlFactoryInterface
 {
     public const CURL_VERSION_STR = 'curl_version';
 
-    private const DELEGATED_PROXY_TUNNEL_OWNER = 'proxy-tunnel:delegated-to-libcurl';
-
     /**
      * @deprecated
      */
@@ -38,80 +33,24 @@ class CurlFactory implements CurlFactoryInterface
     private $handles = [];
 
     /**
-     * @var string|null Owner signature of the proxy tunnels that pooled idle
-     *                  handles may still hold
-     */
-    private $proxyTunnelOwner;
-
-    /**
-     * @var bool Whether an in-domain handle has been pooled since the last purge
-     */
-    private $poolMayHoldTunnels = false;
-
-    /**
      * @var int Total number of idle handles to keep in cache
      */
     private $maxHandles;
 
     /**
-     * @var resource|\Alma_Gateway_CurlShareHandle|null
+     * @param int $maxHandles Maximum number of idle handles.
      */
-    private $shareHandle;
-
-    /**
-     * @var string
-     */
-    private $shareMode;
-
-    /**
-     * @param int                            $maxHandles  Maximum number of idle handles.
-     * @param resource|\Alma_Gateway_CurlShareHandle|null $shareHandle
-     */
-    public function __construct(int $maxHandles, string $shareMode = TransportSharing::NONE, $shareHandle = null)
+    public function __construct(int $maxHandles)
     {
         $this->maxHandles = $maxHandles;
-        $this->shareMode = CurlShareHandleState::normalizeMode($shareMode, 'transport_sharing');
-
-        if ($this->shareMode === TransportSharing::NONE && $shareHandle !== null) {
-            throw new \InvalidArgumentException('A cURL share handle cannot be provided when transport sharing is disabled.');
-        }
-
-        if ($this->shareMode !== TransportSharing::NONE && $shareHandle === null) {
-            throw new \InvalidArgumentException('A cURL share handle is required when transport sharing is enabled.');
-        }
-
-        if ($shareHandle !== null && !self::isCurlShareHandle($shareHandle)) {
-            throw new \InvalidArgumentException('A cURL share handle must be an instance of CurlShareHandle or a curl_share resource.');
-        }
-
-        $this->shareHandle = $shareHandle;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private static function isCurlShareHandle($value): bool
-    {
-        if (\PHP_VERSION_ID < 80000) {
-            return \is_resource($value) && \get_resource_type($value) === 'curl_share';
-        }
-
-        return $value instanceof \Alma_Gateway_CurlShareHandle;
     }
 
     public function create(RequestInterface $request, array $options): EasyHandle
     {
         $protocolVersion = $request->getProtocolVersion();
 
-        if ('' === $protocolVersion) {
-            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.11', 'Sending a request with an empty protocol version is deprecated; guzzlehttp/guzzle 8.0 will reject empty protocol versions.');
-
-            $protocolVersion = '1.1';
-            $request = Psr7\Utils::modifyRequest($request, ['version' => $protocolVersion]);
-        }
-
         if ('2' === $protocolVersion || '2.0' === $protocolVersion) {
-            if (!CurlVersion::supportsHttp2()) {
+            if (!self::supportsHttp2()) {
                 throw new ConnectException('HTTP/2 is supported by the cURL handler, however libcurl is built without HTTP/2 support.', $request);
             }
         } elseif ('1.0' !== $protocolVersion && '1.1' !== $protocolVersion) {
@@ -122,11 +61,6 @@ class CurlFactory implements CurlFactoryInterface
             $options['_body_as_string'] = $options['curl']['body_as_string'];
             unset($options['curl']['body_as_string']);
         }
-
-        self::triggerUnsupportedRequestOptionDeprecations($options);
-        $this->rejectRequestLevelShareConflict($options);
-        self::triggerUnsupportedCurlOptionDeprecations($options);
-        self::triggerConflictingCurlOptionDeprecations($options);
 
         $easy = new EasyHandle();
         $easy->request = $request;
@@ -142,395 +76,47 @@ class CurlFactory implements CurlFactoryInterface
             $conf = \array_replace($conf, $options['curl']);
         }
 
-        if ($this->shareHandle !== null) {
-            // Conservative blanket mode: a configured share handle hides the
-            // pooled connections' provenance, so sectioned reuse cannot reason
-            // about them.
-            self::forceFreshConnectionForAuthenticatedProxy($request, $conf);
-        } else {
-            $signature = self::proxyTunnelSignature($request, $conf);
-            $easy->proxyTunnelSignature = $signature;
-            if ($signature !== null && $signature !== $this->proxyTunnelOwner) {
-                if ($this->poolMayHoldTunnels) {
-                    // Pooled idle handles may hold a different owner's tunnel.
-                    $this->discardIdleHandles();
-                    $this->poolMayHoldTunnels = false;
-                }
-                // The first in-domain owner latches without purging: the pool
-                // provably holds no in-domain tunnel yet.
-                $this->proxyTunnelOwner = $signature;
-            }
-        }
-
-        $easy->effectiveProxy = self::getEffectiveProxy($conf);
-
         $conf[\Alma_Gateway_CURLOPT_HEADERFUNCTION] = $this->createHeaderFn($easy);
-        if ($this->shareHandle !== null) {
-            if (!\defined('CURLOPT_SHARE')) {
-                throw new \InvalidArgumentException('The configured cURL share handle requires CURLOPT_SHARE, but it is not available in the installed PHP cURL extension.');
-            }
-
-            $conf[(int) \constant('CURLOPT_SHARE')] = $this->shareHandle;
-        }
-
-        $handle = $this->handles ? \array_pop($this->handles) : \curl_init();
-        if (false === $handle) {
-            throw new \RuntimeException('Can not initialize cURL handle.');
-        }
-        $easy->handle = $handle;
-
-        try {
-            $this->applyCurlOptions($handle, $conf);
-        } catch (\Throwable $e) {
-            if (PHP_VERSION_ID < 80000 && \is_resource($handle)) {
-                \curl_close($handle);
-            }
-            unset($easy->handle);
-
-            throw $e;
-        }
+        $easy->handle = $this->handles ? \array_pop($this->handles) : \curl_init();
+        curl_setopt_array($easy->handle, $conf);
 
         return $easy;
     }
 
-    /**
-     * @param resource|\Alma_Gateway_CurlHandle     $handle
-     * @param array<int|string, mixed> $conf
-     */
-    private function applyCurlOptions($handle, array $conf): void
+    private static function supportsHttp2(): bool
     {
-        foreach ($conf as $option => $value) {
-            if (!\is_int($option)) {
-                throw new \InvalidArgumentException(\sprintf(
-                    'Invalid cURL option %s.',
-                    self::formatCurlOption($option)
-                ));
-            }
+        static $supportsHttp2 = null;
 
-            try {
-                $success = curl_setopt($handle, $option, $value);
-            } catch (\Throwable $e) {
-                throw new \InvalidArgumentException(
-                    \sprintf(
-                        'Unable to set cURL option %s: %s',
-                        self::formatCurlOption($option),
-                        $e->getMessage()
-                    ),
-                    0,
-                    $e
-                );
-            }
-
-            if (!$success) {
-                throw new \InvalidArgumentException(\sprintf(
-                    'Unable to set cURL option %s.',
-                    self::formatCurlOption($option)
-                ));
-            }
+        if (null === $supportsHttp2) {
+            $supportsHttp2 = self::supportsTls12()
+                && defined('CURL_VERSION_HTTP2')
+                && (\Alma_Gateway_CURL_VERSION_HTTP2 & \curl_version()['features']);
         }
+
+        return $supportsHttp2;
     }
 
-    private function rejectRequestLevelShareConflict(array $options): void
+    private static function supportsTls12(): bool
     {
-        if ($this->shareHandle === null) {
-            return;
+        static $supportsTls12 = null;
+
+        if (null === $supportsTls12) {
+            $supportsTls12 = \Alma_Gateway_CURL_SSLVERSION_TLSv1_2 & \curl_version()['features'];
         }
 
-        if (
-            !\defined('CURLOPT_SHARE')
-            || !isset($options['curl'])
-            || !\is_array($options['curl'])
-            || !\array_key_exists((int) \constant('CURLOPT_SHARE'), $options['curl'])
-        ) {
-            return;
-        }
-
-        throw new \InvalidArgumentException('The request-level CURLOPT_SHARE cURL option cannot be combined with configured transport sharing.');
+        return $supportsTls12;
     }
 
-    /**
-     * @param int|string $option
-     */
-    private static function formatCurlOption($option): string
+    private static function supportsTls13(): bool
     {
-        if (!\is_int($option)) {
-            return \sprintf('"%s"', $option);
+        static $supportsTls13 = null;
+
+        if (null === $supportsTls13) {
+            $supportsTls13 = defined('CURL_SSLVERSION_TLSv1_3')
+                && (\Alma_Gateway_CURL_SSLVERSION_TLSv1_3 & \curl_version()['features']);
         }
 
-        static $names = null;
-
-        if (null === $names) {
-            $names = [];
-            foreach (\get_defined_constants(true)['curl'] ?? [] as $name => $value) {
-                if (\is_int($value) && \strpos($name, 'CURLOPT_') === 0 && !isset($names[$value])) {
-                    $names[$value] = $name;
-                }
-            }
-        }
-
-        if (isset($names[$option])) {
-            return \sprintf('%s (%d)', $names[$option], $option);
-        }
-
-        return (string) $option;
-    }
-
-    private static function triggerConflictingCurlOptionDeprecations(array $options): void
-    {
-        if (!isset($options['curl']) || !\is_array($options['curl']) || $options['curl'] === []) {
-            return;
-        }
-
-        $conflictingOptions = self::conflictingCurlOptions();
-        $sinceOverrides = self::conflictingCurlOptionSinceOverrides();
-
-        foreach ($options['curl'] as $option => $_) {
-            if (!\array_key_exists($option, $conflictingOptions)) {
-                continue;
-            }
-
-            $name = self::formatCurlOption($option);
-            $replacement = $conflictingOptions[$option];
-            $since = $sinceOverrides[$option] ?? '7.11';
-            if ($replacement !== null) {
-                alma_gateway_trigger_deprecation(
-                    'guzzlehttp/guzzle',
-                    $since,
-                    \sprintf(
-                        'Passing %s in the "curl" request option is deprecated; guzzlehttp/guzzle 8.0 will reject this option because it conflicts with Guzzle-managed request handling. Use %s instead.',
-                        $name,
-                        $replacement
-                    )
-                );
-
-                continue;
-            }
-
-            alma_gateway_trigger_deprecation(
-                'guzzlehttp/guzzle',
-                $since,
-                \sprintf(
-                    'Passing %s in the "curl" request option is deprecated; guzzlehttp/guzzle 8.0 will reject this option because it conflicts with Guzzle-managed cURL internals.',
-                    $name
-                )
-            );
-        }
-    }
-
-    private static function triggerUnsupportedCurlOptionDeprecations(array $options): void
-    {
-        if (!isset($options['curl']) || !\is_array($options['curl']) || $options['curl'] === []) {
-            return;
-        }
-
-        $supportedOptions = self::supportedCurlOptions();
-        $conflictingOptions = self::conflictingCurlOptions();
-
-        foreach ($options['curl'] as $option => $_) {
-            if (
-                !\is_int($option)
-                || \array_key_exists($option, $supportedOptions)
-                || \array_key_exists($option, $conflictingOptions)
-            ) {
-                continue;
-            }
-
-            alma_gateway_trigger_deprecation(
-                'guzzlehttp/guzzle',
-                '7.12',
-                \sprintf(
-                    'Passing %s in the "curl" request option is deprecated; guzzlehttp/guzzle 8.0 will reject raw cURL options outside the built-in cURL handlers\' allow-list.',
-                    self::formatCurlOption($option)
-                )
-            );
-        }
-    }
-
-    private static function triggerUnsupportedRequestOptionDeprecations(array $options): void
-    {
-        if (\array_key_exists('stream_context', $options)) {
-            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.11', 'Passing the "stream_context" request option to a cURL handler is deprecated; guzzlehttp/guzzle 8.0 will reject this option because cURL handlers ignore PHP stream context options.');
-        }
-    }
-
-    /**
-     * @return array<int, string|null>
-     */
-    private static function conflictingCurlOptions(): array
-    {
-        static $options = null;
-
-        if ($options !== null) {
-            return $options;
-        }
-
-        $options = [];
-
-        self::addConflictingCurlOption($options, 'CURLOPT_SHARE', 'the "transport_sharing" client option or cURL handler option');
-        self::addConflictingCurlOption($options, 'CURLOPT_URL', 'the request URI');
-        self::addConflictingCurlOption($options, 'CURLOPT_PORT', 'the request URI');
-        self::addConflictingCurlOption($options, 'CURLOPT_CUSTOMREQUEST', 'the request method');
-        self::addConflictingCurlOption($options, 'CURLOPT_HTTPGET', 'the request method');
-        self::addConflictingCurlOption($options, 'CURLOPT_POST', 'the request method and body');
-        self::addConflictingCurlOption($options, 'CURLOPT_PUT', 'the request method and body');
-        self::addConflictingCurlOption($options, 'CURLOPT_NOBODY', 'the request method');
-        self::addConflictingCurlOption($options, 'CURLOPT_UPLOAD', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_POSTFIELDS', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_READFUNCTION', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_READDATA', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_INFILE', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_INFILESIZE', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_INFILESIZE_LARGE', 'the request body');
-        self::addConflictingCurlOption($options, 'CURLOPT_HTTPHEADER', 'the request headers');
-        self::addConflictingCurlOption($options, 'CURLOPT_USERAGENT', 'the request headers');
-        self::addConflictingCurlOption($options, 'CURLOPT_REFERER', 'the request headers');
-        self::addConflictingCurlOption($options, 'CURLOPT_HEADERFUNCTION', 'the "on_headers" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_WRITEFUNCTION', 'the "sink" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_FILE', 'the "sink" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_TIMEOUT', 'the "timeout" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_TIMEOUT_MS', 'the "timeout" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_CONNECTTIMEOUT', 'the "connect_timeout" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_CONNECTTIMEOUT_MS', 'the "connect_timeout" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_NOSIGNAL', 'the "timeout" or "connect_timeout" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_NOPROGRESS', 'the "progress" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_PROGRESSFUNCTION', 'the "progress" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_XFERINFOFUNCTION', 'the "progress" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_VERBOSE', 'the "debug" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_STDERR', 'the "debug" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_PROXY', 'the "proxy" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_NOPROXY', 'the "proxy" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_PROXYTYPE', 'the "proxy" request option with a scheme-prefixed URL');
-        self::addConflictingCurlOption($options, 'CURLOPT_FOLLOWLOCATION', 'the "allow_redirects" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_MAXREDIRS', 'the "allow_redirects" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_POSTREDIR', 'the "allow_redirects" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_REDIR_PROTOCOLS', 'the "allow_redirects" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_REDIR_PROTOCOLS_STR', 'the "allow_redirects" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_PROTOCOLS', 'the "protocols" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_PROTOCOLS_STR', 'the "protocols" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_HTTP_VERSION', 'the request protocol version');
-        self::addConflictingCurlOption($options, 'CURLOPT_IPRESOLVE', 'the "force_ip_resolve" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSL_VERIFYPEER', 'the "verify" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSL_VERIFYHOST', 'the "verify" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_CAINFO', 'the "verify" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_CAPATH', 'the "verify" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLVERSION', 'the "crypto_method" or "crypto_method_max" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLCERT', 'the "cert" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLCERTPASSWD', 'the "cert" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLCERTTYPE', 'the "cert_type" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLKEY', 'the "ssl_key" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLKEYPASSWD', 'the "ssl_key" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_KEYPASSWD', 'the "ssl_key" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_SSLKEYTYPE', 'the "ssl_key_type" request option');
-        self::addConflictingCurlOption($options, 'CURLOPT_COOKIE', 'the "Cookie" request header or Guzzle cookie middleware');
-        self::addConflictingCurlOption($options, 'CURLOPT_COOKIEFILE', 'Guzzle cookie middleware');
-        self::addConflictingCurlOption($options, 'CURLOPT_COOKIEJAR', 'Guzzle cookie middleware');
-        self::addConflictingCurlOption($options, 'CURLOPT_COOKIELIST', 'Guzzle cookie middleware');
-        self::addConflictingCurlOption($options, 'CURLOPT_COOKIESESSION', 'Guzzle cookie middleware');
-
-        return $options;
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private static function conflictingCurlOptionSinceOverrides(): array
-    {
-        static $options = null;
-
-        if ($options !== null) {
-            return $options;
-        }
-
-        $options = [];
-
-        if (\defined('CURLOPT_PROXYTYPE')) {
-            $options[\Alma_Gateway_CURLOPT_PROXYTYPE] = '7.12';
-        }
-
-        return $options;
-    }
-
-    /**
-     * @return array<int, true>
-     */
-    private static function supportedCurlOptions(): array
-    {
-        static $options = null;
-
-        if ($options !== null) {
-            return $options;
-        }
-
-        $options = [];
-
-        self::addSupportedCurlOption($options, 'CURLOPT_ADDRESS_SCOPE');
-        self::addSupportedCurlOption($options, 'CURLOPT_CONNECT_TO');
-        self::addSupportedCurlOption($options, 'CURLOPT_DNS_CACHE_TIMEOUT');
-        self::addSupportedCurlOption($options, 'CURLOPT_DNS_INTERFACE');
-        self::addSupportedCurlOption($options, 'CURLOPT_DNS_LOCAL_IP4');
-        self::addSupportedCurlOption($options, 'CURLOPT_DNS_LOCAL_IP6');
-        self::addSupportedCurlOption($options, 'CURLOPT_DNS_SERVERS');
-        self::addSupportedCurlOption($options, 'CURLOPT_DNS_SHUFFLE_ADDRESSES');
-        self::addSupportedCurlOption($options, 'CURLOPT_ENCODING');
-        self::addSupportedCurlOption($options, 'CURLOPT_FORBID_REUSE');
-        self::addSupportedCurlOption($options, 'CURLOPT_FRESH_CONNECT');
-        self::addSupportedCurlOption($options, 'CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS');
-        self::addSupportedCurlOption($options, 'CURLOPT_HTTPAUTH');
-        self::addSupportedCurlOption($options, 'CURLOPT_INTERFACE');
-        self::addSupportedCurlOption($options, 'CURLOPT_LOCALPORT');
-        self::addSupportedCurlOption($options, 'CURLOPT_LOCALPORTRANGE');
-        self::addSupportedCurlOption($options, 'CURLOPT_LOW_SPEED_LIMIT');
-        self::addSupportedCurlOption($options, 'CURLOPT_LOW_SPEED_TIME');
-        self::addSupportedCurlOption($options, 'CURLOPT_MAXAGE_CONN');
-        self::addSupportedCurlOption($options, 'CURLOPT_MAXCONNECTS');
-        self::addSupportedCurlOption($options, 'CURLOPT_MAXLIFETIME_CONN');
-        self::addSupportedCurlOption($options, 'CURLOPT_HTTPPROXYTUNNEL');
-        self::addSupportedCurlOption($options, 'CURLOPT_PROXYHEADER');
-        self::addSupportedCurlOption($options, 'CURLOPT_PROXYUSERPWD');
-        self::addSupportedCurlOption($options, 'CURLOPT_RESOLVE');
-        self::addSupportedCurlOption($options, 'CURLOPT_SSL_CIPHER_LIST');
-        self::addSupportedCurlOption($options, 'CURLOPT_SSL_EC_CURVES');
-        self::addSupportedCurlOption($options, 'CURLOPT_TCP_FASTOPEN');
-        self::addSupportedCurlOption($options, 'CURLOPT_TCP_KEEPALIVE');
-        self::addSupportedCurlOption($options, 'CURLOPT_TCP_KEEPIDLE');
-        self::addSupportedCurlOption($options, 'CURLOPT_TCP_KEEPINTVL');
-        self::addSupportedCurlOption($options, 'CURLOPT_TCP_KEEPCNT');
-        self::addSupportedCurlOption($options, 'CURLOPT_TCP_NODELAY');
-        self::addSupportedCurlOption($options, 'CURLOPT_TLS13_CIPHERS');
-        self::addSupportedCurlOption($options, 'CURLOPT_UNIX_SOCKET_PATH');
-        self::addSupportedCurlOption($options, 'CURLOPT_USERPWD');
-
-        return $options;
-    }
-
-    /**
-     * @param array<int, true> $options
-     */
-    private static function addSupportedCurlOption(array &$options, string $constant): void
-    {
-        if (!\defined($constant)) {
-            return;
-        }
-
-        $value = \constant($constant);
-        if (\is_int($value)) {
-            $options[$value] = true;
-        }
-    }
-
-    /**
-     * @param array<int, string|null> $options
-     */
-    private static function addConflictingCurlOption(array &$options, string $constant, ?string $replacement): void
-    {
-        if (!\defined($constant)) {
-            return;
-        }
-
-        $value = \constant($constant);
-        if (\is_int($value)) {
-            $options[$value] = $replacement;
-        }
+        return $supportsTls13;
     }
 
     public function release(EasyHandle $easy): void
@@ -538,34 +124,22 @@ class CurlFactory implements CurlFactoryInterface
         $resource = $easy->handle;
         unset($easy->handle);
 
-        if (
-            \count($this->handles) >= $this->maxHandles
-            || ($easy->proxyTunnelSignature !== null && $easy->proxyTunnelSignature !== $this->proxyTunnelOwner)
-        ) {
-            // Pool is full, or this handle belongs to a superseded tunnel
-            // owner (an async create/release overlap can hand a stale-owner
-            // handle back after a purge) - drop it instead of pooling it.
+        if (\count($this->handles) >= $this->maxHandles) {
             if (PHP_VERSION_ID < 80000) {
                 \curl_close($resource);
             }
-
-            return;
+        } else {
+            // Remove all callback functions as they can hold onto references
+            // and are not cleaned up by curl_reset. Using curl_setopt_array
+            // does not work for some reason, so removing each one
+            // individually.
+            \curl_setopt($resource, \Alma_Gateway_CURLOPT_HEADERFUNCTION, null);
+            \curl_setopt($resource, \Alma_Gateway_CURLOPT_READFUNCTION, null);
+            \curl_setopt($resource, \Alma_Gateway_CURLOPT_WRITEFUNCTION, null);
+            \curl_setopt($resource, \Alma_Gateway_CURLOPT_PROGRESSFUNCTION, null);
+            \curl_reset($resource);
+            $this->handles[] = $resource;
         }
-
-        if ($easy->proxyTunnelSignature !== null) {
-            // A pooled handle now carries the current owner's tunnel.
-            $this->poolMayHoldTunnels = true;
-        }
-
-        // Remove all callback functions as they can hold onto references and
-        // are not cleaned up by curl_reset. Using curl_setopt_array does not
-        // work for some reason, so removing each one individually.
-        \curl_setopt($resource, \Alma_Gateway_CURLOPT_HEADERFUNCTION, null);
-        \curl_setopt($resource, \Alma_Gateway_CURLOPT_READFUNCTION, null);
-        \curl_setopt($resource, \Alma_Gateway_CURLOPT_WRITEFUNCTION, null);
-        \curl_setopt($resource, \Alma_Gateway_CURLOPT_PROGRESSFUNCTION, null);
-        \curl_reset($resource);
-        $this->handles[] = $resource;
     }
 
     /**
@@ -622,7 +196,7 @@ class CurlFactory implements CurlFactoryInterface
             'error' => \curl_error($easy->handle),
             'appconnect_time' => \curl_getinfo($easy->handle, \Alma_Gateway_CURLINFO_APPCONNECT_TIME),
         ] + \curl_getinfo($easy->handle);
-        $ctx[self::CURL_VERSION_STR] = CurlVersion::getVersion() ?? '';
+        $ctx[self::CURL_VERSION_STR] = self::getCurlVersion();
         $factory->release($easy);
 
         // Retry when nothing is present or when curl failed to rewind.
@@ -631,6 +205,17 @@ class CurlFactory implements CurlFactoryInterface
         }
 
         return self::createRejection($easy, $ctx);
+    }
+
+    private static function getCurlVersion(): string
+    {
+        static $curlVersion = null;
+
+        if (null === $curlVersion) {
+            $curlVersion = \curl_version()['version'];
+        }
+
+        return $curlVersion;
     }
 
     private static function createRejection(EasyHandle $easy, array $ctx): PromiseInterface
@@ -648,7 +233,7 @@ class CurlFactory implements CurlFactoryInterface
                 new RequestException(
                     'An error was encountered while creating the response',
                     $easy->request,
-                    null,
+                    $easy->response,
                     $easy->createResponseException,
                     $ctx
                 )
@@ -671,17 +256,17 @@ class CurlFactory implements CurlFactoryInterface
 
         $uri = $easy->request->getUri();
 
-        $sanitizedError = self::sanitizeCurlError($ctx['error'] ?? '', $uri, $easy->effectiveProxy);
+        $sanitizedError = self::sanitizeCurlError($ctx['error'] ?? '', $uri);
 
         $message = \sprintf(
             'cURL error %s: %s (%s)',
             $ctx['errno'],
             $sanitizedError,
-            'see https://curl.se/libcurl/c/libcurl-errors.html'
+            'see https://curl.haxx.se/libcurl/c/libcurl-errors.html'
         );
 
         if ('' !== $sanitizedError) {
-            $redactedUriString = Psr7\Utils::redactUserInfo($uri)->__toString();
+            $redactedUriString = \Alma\Vendor\GuzzleHttp\Psr7\Utils::redactUserInfo($uri)->__toString();
             if ($redactedUriString !== '' && false === \strpos($sanitizedError, $redactedUriString)) {
                 $message .= \sprintf(' for %s', $redactedUriString);
             }
@@ -695,13 +280,11 @@ class CurlFactory implements CurlFactoryInterface
         return P\Create::rejectionFor($error);
     }
 
-    private static function sanitizeCurlError(string $error, UriInterface $uri, ?string $proxy = null): string
+    private static function sanitizeCurlError(string $error, UriInterface $uri): string
     {
         if ('' === $error) {
             return $error;
         }
-
-        $error = self::redactProxyUserInfo($error, $proxy);
 
         $baseUri = $uri->withQuery('')->withFragment('');
         $baseUriString = $baseUri->__toString();
@@ -710,409 +293,9 @@ class CurlFactory implements CurlFactoryInterface
             return $error;
         }
 
-        $redactedUriString = Psr7\Utils::redactUserInfo($baseUri)->__toString();
+        $redactedUriString = \Alma\Vendor\GuzzleHttp\Psr7\Utils::redactUserInfo($baseUri)->__toString();
 
         return str_replace($baseUriString, $redactedUriString, $error);
-    }
-
-    private static function redactProxyUserInfo(string $error, ?string $proxy): string
-    {
-        if ($proxy === null || $proxy === '' || \strpos($proxy, '@') === false) {
-            return $error;
-        }
-
-        // The error message embeds the proxy string exactly as configured,
-        // so the userinfo needle is extracted with parse_url(): Psr7\Uri
-        // normalizes the components, which could make the replacement miss.
-        $proxyForParsing = \strpos($proxy, '://') === false ? 'http://'.$proxy : $proxy;
-        $proxyParts = \parse_url($proxyForParsing);
-
-        if (!\is_array($proxyParts)) {
-            // Proxy strings that defeat parse_url() are exactly the ones
-            // libcurl embeds verbatim in error text such as "Unsupported
-            // proxy syntax in '...'": redact everything up to the last '@'
-            // of the authority as a safe-side fallback.
-            $authority = \substr($proxyForParsing, \strpos($proxyForParsing, '://') + 3);
-            $atPosition = \strrpos($authority, '@');
-
-            if ($atPosition === false || $atPosition === 0) {
-                return $error;
-            }
-
-            return \str_replace(\substr($authority, 0, $atPosition).'@', '***@', $error);
-        }
-
-        if (!isset($proxyParts['user']) && !isset($proxyParts['pass'])) {
-            return $error;
-        }
-
-        $userInfo = $proxyParts['user'] ?? '';
-        if (isset($proxyParts['pass'])) {
-            $userInfo .= ':'.$proxyParts['pass'];
-        }
-
-        if ($userInfo === '') {
-            return $error;
-        }
-
-        $redactedUserInfo = '***';
-
-        try {
-            $proxyUri = new Uri($proxyForParsing);
-            $redactedUserInfo = Psr7\Utils::redactUserInfo($proxyUri)->getUserInfo();
-
-            if ($redactedUserInfo === $proxyUri->getUserInfo()) {
-                return $error;
-            }
-        } catch (\InvalidArgumentException $e) {
-            // Unparseable as a URI: fall back to redacting the whole userinfo.
-        }
-
-        return \str_replace($userInfo.'@', $redactedUserInfo.'@', $error);
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function forceFreshConnectionForAuthenticatedProxy(RequestInterface $request, array &$conf): void
-    {
-        $proxy = self::getEffectiveProxy($conf);
-
-        if ($proxy === null || !self::requiresFreshConnectionForAuthenticatedProxy($request, $proxy, $conf)) {
-            return;
-        }
-
-        $conf[\Alma_Gateway_CURLOPT_FRESH_CONNECT] = true;
-        $conf[\Alma_Gateway_CURLOPT_FORBID_REUSE] = true;
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function getEffectiveProxy(array $conf): ?string
-    {
-        if (!\array_key_exists(\Alma_Gateway_CURLOPT_PROXY, $conf)) {
-            return null;
-        }
-
-        $proxy = $conf[\Alma_Gateway_CURLOPT_PROXY];
-
-        return \is_string($proxy) && $proxy !== '' ? $proxy : null;
-    }
-
-    private static function proxyScheme(string $proxy): ?string
-    {
-        $position = \strpos($proxy, '://');
-
-        return $position === false ? null : \strtolower(\substr($proxy, 0, $position));
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function requiresFreshConnectionForAuthenticatedProxy(RequestInterface $request, string $proxy, array $conf): bool
-    {
-        if (!self::usesProxyTunnel($request, $conf) || !self::isHttpProxyForConnectionReuse($proxy, $conf)) {
-            return false;
-        }
-
-        $proxyForParsing = \strpos($proxy, '://') === false ? 'http://'.$proxy : $proxy;
-        $proxyParts = \parse_url($proxyForParsing);
-
-        if (!\is_array($proxyParts)) {
-            return false;
-        }
-
-        if (self::hasCurlProxyAuthorizationHeader($conf)) {
-            return true;
-        }
-
-        // A proxy client certificate or TLS-SRP authenticates the client to the
-        // HTTPS proxy at the TLS layer; libcurl ignored TLS-SRP before 7.83.1
-        // (CVE-2022-27782), so an old build can reuse a tunnel across those
-        // identities. Force a fresh one, as the non-share signature path does.
-        if (
-            !CurlVersion::supportsProxyTlsCredentialAwareConnectionReuse()
-            && self::hasCurlProxyTlsCredentials($conf)
-        ) {
-            return true;
-        }
-
-        if (CurlVersion::supportsProxyCredentialAwareConnectionReuse()) {
-            return false;
-        }
-
-        return \array_key_exists('user', $proxyParts)
-            || \array_key_exists('pass', $proxyParts)
-            || self::hasCurlProxyCredentials($conf);
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function usesProxyTunnel(RequestInterface $request, array $conf): bool
-    {
-        $scheme = $request->getUri()->getScheme();
-
-        if ('https' === $scheme) {
-            return true;
-        }
-
-        // An HTTP proxy auto-switches to a CONNECT tunnel when CONNECT_TO
-        // redirects the origin, so an http:// target with it set tunnels too.
-        if ('http' === $scheme && self::hasCurlConnectTo($conf)) {
-            return true;
-        }
-
-        return \defined('CURLOPT_HTTPPROXYTUNNEL')
-            && \array_key_exists((int) \constant('CURLOPT_HTTPPROXYTUNNEL'), $conf)
-            && (bool) $conf[(int) \constant('CURLOPT_HTTPPROXYTUNNEL')];
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function hasCurlConnectTo(array $conf): bool
-    {
-        if (!\defined('CURLOPT_CONNECT_TO')) {
-            return false;
-        }
-
-        $option = (int) \constant('CURLOPT_CONNECT_TO');
-        if (!\array_key_exists($option, $conf)) {
-            return false;
-        }
-
-        $value = $conf[$option];
-
-        return \is_array($value)
-            ? $value !== []
-            : $value !== null && $value !== false && $value !== '';
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function isHttpProxyForConnectionReuse(string $proxy, array $conf): bool
-    {
-        if (\strpos($proxy, '://') !== false) {
-            $proxyParts = \parse_url($proxy);
-
-            if (!\is_array($proxyParts) || !isset($proxyParts['scheme'])) {
-                return false;
-            }
-
-            $proxyScheme = \strtolower($proxyParts['scheme']);
-
-            return $proxyScheme === 'http' || $proxyScheme === 'https';
-        }
-
-        return !self::isSocksProxyType($conf[\Alma_Gateway_CURLOPT_PROXYTYPE] ?? null);
-    }
-
-    /**
-     * @param mixed $proxyType
-     */
-    private static function isSocksProxyType($proxyType): bool
-    {
-        if (!\is_int($proxyType)) {
-            return false;
-        }
-
-        foreach ([
-            'CURLPROXY_SOCKS4' => 4,
-            'CURLPROXY_SOCKS5' => 5,
-            'CURLPROXY_SOCKS4A' => 6,
-            'CURLPROXY_SOCKS5_HOSTNAME' => 7,
-        ] as $name => $fallback) {
-            $value = \defined($name) ? (int) \constant($name) : $fallback;
-            if ($proxyType === $value) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function hasCurlProxyCredentials(array $conf): bool
-    {
-        foreach (['CURLOPT_PROXYUSERPWD', 'CURLOPT_PROXYUSERNAME', 'CURLOPT_PROXYPASSWORD'] as $option) {
-            if (\defined($option) && \array_key_exists((int) \constant($option), $conf)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function hasCurlProxyTlsCredentials(array $conf): bool
-    {
-        foreach ([
-            'CURLOPT_PROXY_SSLCERT',
-            'CURLOPT_PROXY_SSLCERT_BLOB',
-            'CURLOPT_PROXY_TLSAUTH_USERNAME',
-            'CURLOPT_PROXY_TLSAUTH_PASSWORD',
-        ] as $option) {
-            if (\defined($option) && \array_key_exists((int) \constant($option), $conf)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     */
-    private static function hasCurlProxyAuthorizationHeader(array $conf): bool
-    {
-        if (!\defined('CURLOPT_PROXYHEADER')) {
-            return false;
-        }
-
-        $option = (int) \constant('CURLOPT_PROXYHEADER');
-        if (!\array_key_exists($option, $conf)) {
-            return false;
-        }
-
-        $headers = $conf[$option];
-        if (!\is_array($headers)) {
-            return false;
-        }
-
-        foreach ($headers as $header) {
-            if (!\is_string($header)) {
-                continue;
-            }
-
-            $parts = \explode(':', $header, 2);
-            if (\count($parts) !== 2) {
-                continue;
-            }
-
-            if (
-                0 === \strcasecmp(\trim($parts[0]), 'Proxy-Authorization')
-                && \trim($parts[1]) !== ''
-            ) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Computes the connection-reuse section signature for a proxy tunnel, or
-     * null when the request does not require sectioning.
-     *
-     * @param array<int|string, mixed> $conf
-     */
-    private static function proxyTunnelSignature(RequestInterface $request, array $conf): ?string
-    {
-        $proxy = self::getEffectiveProxy($conf);
-        if (
-            $proxy === null
-            || !self::usesProxyTunnel($request, $conf)
-            || !self::isHttpProxyForConnectionReuse($proxy, $conf)
-        ) {
-            return null;
-        }
-
-        $headerAuth = self::curlProxyAuthorizationHeaderValues($conf);
-        if ($headerAuth === [] && CurlVersion::supportsProxyCredentialAwareConnectionReuse()) {
-            // libcurl keys reuse on parsed proxy credentials only from 8.19.0,
-            // trusted from 8.20.0 (PROXY_CREDENTIAL_REUSE_VERSION); a literal
-            // Proxy-Authorization header is never keyed and always sections.
-            return self::DELEGATED_PROXY_TUNNEL_OWNER;
-        }
-
-        // Hash every proxy channel an old libcurl might not key reuse on. A
-        // changed signature only forces a fresh connection, never relaxes
-        // reuse, so over-covering is always safe; under-covering leaks. Proxy
-        // credentials are the channel CVE-2026-3784 missed; the proxy-TLS
-        // options are load-bearing on builds before the proxy-TLS reuse fixes
-        // (client cert from 7.50.1, CVE-2016-5420; TLS-SRP from 7.83.1,
-        // CVE-2022-27782) and harmless after. The private key and cert/key
-        // encoding are deliberately omitted: the hashed X.509 client cert is
-        // the proxy-visible identity and maps 1:1 to its key.
-        $credentialState = [];
-        foreach ([
-            'CURLOPT_PROXYUSERPWD', 'CURLOPT_PROXYUSERNAME', 'CURLOPT_PROXYPASSWORD',
-            'CURLOPT_PROXYTYPE',
-            'CURLOPT_PROXY_SSLCERT', 'CURLOPT_PROXY_SSLCERT_BLOB', 'CURLOPT_PROXY_SSLKEY',
-            'CURLOPT_PROXY_KEYPASSWD', 'CURLOPT_PROXY_TLSAUTH_USERNAME',
-            'CURLOPT_PROXY_TLSAUTH_PASSWORD', 'CURLOPT_PROXY_SSLVERSION',
-        ] as $name) {
-            $credentialState[$name] = \defined($name)
-                ? ($conf[(int) \constant($name)] ?? null)
-                : null;
-        }
-
-        return \hash('sha256', \serialize([$proxy, $credentialState, $headerAuth]));
-    }
-
-    /**
-     * @param array<int|string, mixed> $conf
-     *
-     * @return list<string>
-     */
-    private static function curlProxyAuthorizationHeaderValues(array $conf): array
-    {
-        if (!\defined('CURLOPT_PROXYHEADER')) {
-            return [];
-        }
-
-        $option = (int) \constant('CURLOPT_PROXYHEADER');
-        if (!\array_key_exists($option, $conf)) {
-            return [];
-        }
-
-        $headers = $conf[$option];
-        if (!\is_array($headers)) {
-            return [];
-        }
-
-        $values = [];
-        foreach ($headers as $header) {
-            if (!\is_string($header)) {
-                continue;
-            }
-
-            $parts = \explode(':', $header, 2);
-            if (\count($parts) !== 2) {
-                continue;
-            }
-
-            if (
-                0 === \strcasecmp(\trim($parts[0]), 'Proxy-Authorization')
-                && \trim($parts[1]) !== ''
-            ) {
-                $values[] = \trim($parts[1]);
-            }
-        }
-
-        // Sort so the signature depends on the set of header credentials, not
-        // their order, which avoids spurious re-sectioning across requests.
-        \sort($values);
-
-        return $values;
-    }
-
-    private function discardIdleHandles(): void
-    {
-        foreach ($this->handles as $id => $handle) {
-            if (PHP_VERSION_ID < 80000) {
-                \curl_close($handle);
-            }
-
-            unset($this->handles[$id]);
-        }
     }
 
     /**
@@ -1129,14 +312,8 @@ class CurlFactory implements CurlFactoryInterface
             \Alma_Gateway_CURLOPT_CONNECTTIMEOUT => 300,
         ];
 
-        $protocols = Utils::normalizeProtocols($easy->options['protocols'] ?? ['http', 'https']);
-        $scheme = $easy->request->getUri()->getScheme();
-        if (!\in_array($scheme, $protocols, true)) {
-            throw new RequestException(\sprintf('The scheme "%s" is not allowed by the protocols request option.', $scheme), $easy->request);
-        }
-
         if (\defined('CURLOPT_PROTOCOLS')) {
-            $conf[\Alma_Gateway_CURLOPT_PROTOCOLS] = self::curlProtocolMask($protocols);
+            $conf[\Alma_Gateway_CURLOPT_PROTOCOLS] = \Alma_Gateway_CURLPROTO_HTTP | \Alma_Gateway_CURLPROTO_HTTPS;
         }
 
         $version = $easy->request->getProtocolVersion();
@@ -1150,41 +327,6 @@ class CurlFactory implements CurlFactoryInterface
         }
 
         return $conf;
-    }
-
-    /**
-     * @param string[] $protocols
-     */
-    private static function curlProtocolMask(array $protocols): int
-    {
-        $mask = 0;
-
-        if (\in_array('http', $protocols, true)) {
-            $mask |= \Alma_Gateway_CURLPROTO_HTTP;
-        }
-
-        if (\in_array('https', $protocols, true)) {
-            $mask |= \Alma_Gateway_CURLPROTO_HTTPS;
-        }
-
-        return $mask;
-    }
-
-    /**
-     * @param mixed $type
-     */
-    private static function normalizeTlsFileType(string $option, $type): string
-    {
-        if (!\is_string($type) || $type === '') {
-            throw new \InvalidArgumentException(\sprintf('%s must be a non-empty string', $option));
-        }
-
-        return \strtoupper($type);
-    }
-
-    private static function shouldValidateSslKeyFile(?string $type): bool
-    {
-        return $type !== 'ENG' && $type !== 'PROV';
     }
 
     private function applyMethod(EasyHandle $easy, array &$conf): void
@@ -1284,7 +426,7 @@ class CurlFactory implements CurlFactoryInterface
     private function removeHeader(string $name, array &$options): void
     {
         foreach (\array_keys($options['_headers']) as $key) {
-            if (!\strcasecmp((string) $key, $name)) {
+            if (!\strcasecmp($key, $name)) {
                 unset($options['_headers'][$key]);
 
                 return;
@@ -1326,9 +468,9 @@ class CurlFactory implements CurlFactoryInterface
             }
         }
 
-        if (!isset($options['curl'][\Alma_Gateway_CURLOPT_ENCODING]) && isset($options['decode_content']) && $options['decode_content'] !== false) {
+        if (!isset($options['curl'][\Alma_Gateway_CURLOPT_ENCODING]) && !empty($options['decode_content'])) {
             $accept = $easy->request->getHeaderLine('Accept-Encoding');
-            if ($accept !== '') {
+            if ($accept) {
                 $conf[\Alma_Gateway_CURLOPT_ENCODING] = $accept;
             } else {
                 // The empty string enables all available decoders and implicitly
@@ -1344,11 +486,11 @@ class CurlFactory implements CurlFactoryInterface
 
         if (!isset($options['sink'])) {
             // Use a default temp stream if no sink was set.
-            $options['sink'] = Psr7\Utils::tryFopen('php://temp', 'w+');
+            $options['sink'] = \Alma\Vendor\GuzzleHttp\Psr7\Utils::tryFopen('php://temp', 'w+');
         }
         $sink = $options['sink'];
         if (!\is_string($sink)) {
-            $sink = Psr7\Utils::streamFor($sink);
+            $sink = \Alma\Vendor\GuzzleHttp\Psr7\Utils::streamFor($sink);
         } elseif (!\is_dir(\dirname($sink))) {
             // Ensure that the directory exists before failing in curl.
             throw new \RuntimeException(\sprintf('Directory %s does not exist for sink value of %s', \dirname($sink), $sink));
@@ -1384,96 +526,65 @@ class CurlFactory implements CurlFactoryInterface
             $conf[\Alma_Gateway_CURLOPT_NOSIGNAL] = true;
         }
 
-        // Always pin CURLOPT_PROXY (and CURLOPT_NOPROXY when available) so
-        // that libcurl never falls back to reading proxy environment
-        // variables itself. When the proxy request option makes no decision,
-        // the environment is resolved here with libcurl's own semantics.
-        $proxyConf = null;
-        $noProxyConf = '';
         if (isset($options['proxy'])) {
             if (!\is_array($options['proxy'])) {
-                $proxyConf = $options['proxy'];
+                $conf[\Alma_Gateway_CURLOPT_PROXY] = $options['proxy'];
             } else {
                 $scheme = $easy->request->getUri()->getScheme();
                 if (isset($options['proxy'][$scheme])) {
-                    if (
-                        isset($options['proxy']['no'])
-                        && Utils::isUriInNoProxy($easy->request->getUri(), $options['proxy']['no'])
-                    ) {
-                        $proxyConf = '';
-                        $noProxyConf = '*';
+                    $host = $easy->request->getUri()->getHost();
+                    if (isset($options['proxy']['no']) && Utils::isHostInNoProxy($host, $options['proxy']['no'])) {
+                        unset($conf[\Alma_Gateway_CURLOPT_PROXY]);
                     } else {
-                        $proxyConf = $options['proxy'][$scheme];
+                        $conf[\Alma_Gateway_CURLOPT_PROXY] = $options['proxy'][$scheme];
                     }
                 }
             }
         }
 
-        if ($proxyConf === null) {
-            $proxyConf = ProxyEnvironment::getProxyForScheme($easy->request->getUri()->getScheme());
-            if ($proxyConf === null) {
-                $proxyConf = '';
-            } elseif (
-                ($noProxy = ProxyEnvironment::getNoProxy()) !== null
-                && Utils::isUriInNoProxy($easy->request->getUri(), ProxyEnvironment::splitNoProxy($noProxy))
-            ) {
-                // The environment no_proxy list is tokenized the way libcurl
-                // tokenizes it and matched here with the same rules as the
-                // proxy option's "no" list, so behavior does not depend on
-                // the installed libcurl's matcher.
-                $proxyConf = '';
-                $noProxyConf = '*';
+        if (isset($options['crypto_method'])) {
+            $protocolVersion = $easy->request->getProtocolVersion();
+
+            // If HTTP/2, upgrade TLS 1.0 and 1.1 to 1.2
+            if ('2' === $protocolVersion || '2.0' === $protocolVersion) {
+                if (
+                    \STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT === $options['crypto_method']
+                    || \STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT === $options['crypto_method']
+                    || \STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT === $options['crypto_method']
+                ) {
+                    $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = \Alma_Gateway_CURL_SSLVERSION_TLSv1_2;
+                } elseif (defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT') && \STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT === $options['crypto_method']) {
+                    if (!self::supportsTls13()) {
+                        throw new \InvalidArgumentException('Invalid crypto_method request option: TLS 1.3 not supported by your version of cURL');
+                    }
+                    $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = \Alma_Gateway_CURL_SSLVERSION_TLSv1_3;
+                } else {
+                    throw new \InvalidArgumentException('Invalid crypto_method request option: unknown version provided');
+                }
+            } elseif (\STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT === $options['crypto_method']) {
+                $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = \Alma_Gateway_CURL_SSLVERSION_TLSv1_0;
+            } elseif (\STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT === $options['crypto_method']) {
+                $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = \Alma_Gateway_CURL_SSLVERSION_TLSv1_1;
+            } elseif (\STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT === $options['crypto_method']) {
+                if (!self::supportsTls12()) {
+                    throw new \InvalidArgumentException('Invalid crypto_method request option: TLS 1.2 not supported by your version of cURL');
+                }
+                $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = \Alma_Gateway_CURL_SSLVERSION_TLSv1_2;
+            } elseif (defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT') && \STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT === $options['crypto_method']) {
+                if (!self::supportsTls13()) {
+                    throw new \InvalidArgumentException('Invalid crypto_method request option: TLS 1.3 not supported by your version of cURL');
+                }
+                $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = \Alma_Gateway_CURL_SSLVERSION_TLSv1_3;
+            } else {
+                throw new \InvalidArgumentException('Invalid crypto_method request option: unknown version provided');
             }
-        }
-
-        if (\is_string($proxyConf) && $proxyConf !== '') {
-            $scheme = self::proxyScheme($proxyConf);
-            if ($scheme !== null && \preg_match('/^[a-z][a-z0-9.+-]*$/D', $scheme) !== 1) {
-                // A "://" with a prefix that is not a valid scheme (leading
-                // junk such as a space or non-breaking space) is treated by
-                // libcurl as an unknown scheme and silently downgraded to a
-                // plaintext HTTP proxy. Fail closed before any bytes reach the
-                // wire.
-                throw new RequestException('The proxy URL is malformed.', $easy->request);
-            }
-            if ($scheme === 'https' && !CurlVersion::supportsHttpsProxy()) {
-                // libcurl before 7.50.2 silently downgrades an https:// proxy
-                // to a plaintext HTTP proxy; 7.50.2 through 7.51, and builds
-                // without HTTPS-proxy support, fail at connect time. Fail
-                // closed before any bytes reach the wire.
-                throw new RequestException('HTTPS proxies are not supported by the installed libcurl; libcurl 7.52.0 or newer built with HTTPS-proxy support is required.', $easy->request);
-            }
-        }
-
-        $conf[\Alma_Gateway_CURLOPT_PROXY] = $proxyConf;
-        if (\defined('CURLOPT_NOPROXY')) {
-            $conf[(int) \constant('CURLOPT_NOPROXY')] = $noProxyConf;
-        }
-
-        $this->applyTlsVersionRange($easy, $conf);
-
-        $certType = null;
-        if (isset($options['cert_type'])) {
-            $certType = self::normalizeTlsFileType('cert_type', $options['cert_type']);
-            $conf[\Alma_Gateway_CURLOPT_SSLCERTTYPE] = $certType;
         }
 
         if (isset($options['cert'])) {
             $cert = $options['cert'];
             if (\is_array($cert)) {
-                if (!isset($cert[0]) || !\is_string($cert[0])) {
-                    throw new \InvalidArgumentException('Invalid cert request option');
-                }
-                if (isset($cert[1])) {
-                    if (!\is_string($cert[1])) {
-                        throw new \InvalidArgumentException('Invalid cert request option');
-                    }
-                    $conf[\Alma_Gateway_CURLOPT_SSLCERTPASSWD] = $cert[1];
-                }
+                $conf[\Alma_Gateway_CURLOPT_SSLCERTPASSWD] = $cert[1];
                 $cert = $cert[0];
-            }
-            if (!\is_string($cert)) {
-                throw new \InvalidArgumentException('Invalid cert request option');
             }
             if (!\file_exists($cert)) {
                 throw new \InvalidArgumentException("SSL certificate not found: {$cert}");
@@ -1481,39 +592,24 @@ class CurlFactory implements CurlFactoryInterface
             // OpenSSL (versions 0.9.3 and later) also support "P12" for PKCS#12-encoded files.
             // see https://curl.se/libcurl/c/CURLOPT_SSLCERTTYPE.html
             $ext = pathinfo($cert, \PATHINFO_EXTENSION);
-            if ($certType === null && preg_match('#^(der|p12)$#i', $ext)) {
+            if (preg_match('#^(der|p12)$#i', $ext)) {
                 $conf[\Alma_Gateway_CURLOPT_SSLCERTTYPE] = strtoupper($ext);
             }
             $conf[\Alma_Gateway_CURLOPT_SSLCERT] = $cert;
         }
 
-        $sslKeyType = null;
-        if (isset($options['ssl_key_type'])) {
-            $sslKeyType = self::normalizeTlsFileType('ssl_key_type', $options['ssl_key_type']);
-            $conf[\Alma_Gateway_CURLOPT_SSLKEYTYPE] = $sslKeyType;
-        }
-
         if (isset($options['ssl_key'])) {
             if (\is_array($options['ssl_key'])) {
-                if (!isset($options['ssl_key'][0]) || !\is_string($options['ssl_key'][0])) {
-                    throw new \InvalidArgumentException('Invalid ssl_key request option');
+                if (\count($options['ssl_key']) === 2) {
+                    [$sslKey, $conf[\Alma_Gateway_CURLOPT_SSLKEYPASSWD]] = $options['ssl_key'];
+                } else {
+                    [$sslKey] = $options['ssl_key'];
                 }
-                if (isset($options['ssl_key'][1])) {
-                    if (!\is_string($options['ssl_key'][1])) {
-                        throw new \InvalidArgumentException('Invalid ssl_key request option');
-                    }
-                    $conf[\Alma_Gateway_CURLOPT_SSLKEYPASSWD] = $options['ssl_key'][1];
-                }
-                $sslKey = $options['ssl_key'][0];
             }
 
             $sslKey = $sslKey ?? $options['ssl_key'];
 
-            if (!\is_string($sslKey)) {
-                throw new \InvalidArgumentException('Invalid ssl_key request option');
-            }
-
-            if (self::shouldValidateSslKeyFile($sslKeyType) && !\file_exists($sslKey)) {
+            if (!\file_exists($sslKey)) {
                 throw new \InvalidArgumentException("SSL private key not found: {$sslKey}");
             }
             $conf[\Alma_Gateway_CURLOPT_SSLKEY] = $sslKey;
@@ -1534,110 +630,6 @@ class CurlFactory implements CurlFactoryInterface
             $conf[\Alma_Gateway_CURLOPT_STDERR] = Utils::debugResource($options['debug']);
             $conf[\Alma_Gateway_CURLOPT_VERBOSE] = true;
         }
-    }
-
-    private function applyTlsVersionRange(EasyHandle $easy, array &$conf): void
-    {
-        $options = $easy->options;
-        $cryptoMethod = $options['crypto_method'] ?? null;
-        $cryptoMethodMax = $options['crypto_method_max'] ?? null;
-
-        if ($cryptoMethod === null && $cryptoMethodMax === null) {
-            return;
-        }
-
-        $protocolVersion = $easy->request->getProtocolVersion();
-        $isHttp2 = '2' === $protocolVersion || '2.0' === $protocolVersion;
-
-        if ($isHttp2 && $cryptoMethodMax !== null && TlsVersion::ordinal('crypto_method_max', $cryptoMethodMax) < 12) {
-            throw new \InvalidArgumentException(
-                'Invalid crypto_method_max request option: HTTP/2 requires TLS 1.2 or higher'
-            );
-        }
-
-        if ($isHttp2 && $cryptoMethod !== null && TlsVersion::ordinal('crypto_method', $cryptoMethod) < 12) {
-            $cryptoMethod = \STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
-        }
-
-        TlsVersion::assertRange($cryptoMethod, $cryptoMethodMax);
-
-        $sslVersion = $cryptoMethod === null
-            ? \Alma_Gateway_CURL_SSLVERSION_DEFAULT
-            : self::curlMinSslVersion($cryptoMethod);
-
-        if ($cryptoMethodMax !== null) {
-            $sslVersion |= self::curlMaxSslVersion($cryptoMethodMax);
-        }
-
-        $conf[\Alma_Gateway_CURLOPT_SSLVERSION] = $sslVersion;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private static function curlMinSslVersion($value): int
-    {
-        if ($value === \STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT) {
-            return \Alma_Gateway_CURL_SSLVERSION_TLSv1_0;
-        }
-
-        if ($value === \STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT) {
-            return \Alma_Gateway_CURL_SSLVERSION_TLSv1_1;
-        }
-
-        if ($value === \STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT) {
-            if (!CurlVersion::supportsTls12()) {
-                throw new \InvalidArgumentException('Invalid crypto_method request option: TLS 1.2 not supported by your version of cURL');
-            }
-
-            return \Alma_Gateway_CURL_SSLVERSION_TLSv1_2;
-        }
-
-        if (\defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT') && $value === \STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT) {
-            if (!CurlVersion::supportsTls13()) {
-                throw new \InvalidArgumentException('Invalid crypto_method request option: TLS 1.3 not supported by your version of cURL');
-            }
-
-            return \Alma_Gateway_CURL_SSLVERSION_TLSv1_3;
-        }
-
-        throw new \InvalidArgumentException('Invalid crypto_method request option: unknown version provided');
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private static function curlMaxSslVersion($value): int
-    {
-        if ($value === \STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT) {
-            return self::requireCurlMaxSslVersion('CURL_SSLVERSION_MAX_TLSv1_0');
-        }
-
-        if ($value === \STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT) {
-            return self::requireCurlMaxSslVersion('CURL_SSLVERSION_MAX_TLSv1_1');
-        }
-
-        if ($value === \STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT) {
-            return self::requireCurlMaxSslVersion('CURL_SSLVERSION_MAX_TLSv1_2');
-        }
-
-        if (\defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT') && $value === \STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT) {
-            return self::requireCurlMaxSslVersion('CURL_SSLVERSION_MAX_TLSv1_3');
-        }
-
-        throw new \InvalidArgumentException('Invalid crypto_method_max request option: unknown version provided');
-    }
-
-    private static function requireCurlMaxSslVersion(string $constant): int
-    {
-        if (\defined($constant)) {
-            /** @var int */
-            return \constant($constant);
-        }
-
-        throw new \InvalidArgumentException(
-            'Invalid crypto_method_max request option: maximum TLS version control is not supported by your version of cURL'
-        );
     }
 
     /**
@@ -1709,8 +701,7 @@ class CurlFactory implements CurlFactoryInterface
                 $startingResponse = true;
                 try {
                     $easy->createResponse();
-                } catch (\Throwable $e) {
-                    $easy->response = null;
+                } catch (\Alma_Gateway_Exception $e) {
                     $easy->createResponseException = $e;
 
                     return -1;
@@ -1718,7 +709,7 @@ class CurlFactory implements CurlFactoryInterface
                 if ($onHeaders !== null) {
                     try {
                         $onHeaders($easy->response);
-                    } catch (\Throwable $e) {
+                    } catch (\Alma_Gateway_Exception $e) {
                         // Associate the exception with the handle and trigger
                         // a curl header write error by returning 0.
                         $easy->onHeadersException = $e;
@@ -1739,6 +730,12 @@ class CurlFactory implements CurlFactoryInterface
 
     public function __destruct()
     {
-        $this->discardIdleHandles();
+        foreach ($this->handles as $id => $handle) {
+            if (PHP_VERSION_ID < 80000) {
+                \curl_close($handle);
+            }
+
+            unset($this->handles[$id]);
+        }
     }
 }

@@ -185,25 +185,11 @@ class HandlerStack
         }
 
         $this->cached = null;
-
-        if (\is_string($remove)) {
-            $count = \count($this->stack);
-            $this->stack = \array_values(\array_filter(
-                $this->stack,
-                static function ($tuple) use ($remove) {
-                    return $tuple[1] !== $remove;
-                }
-            ));
-
-            if ($count !== \count($this->stack) || !\is_callable($remove)) {
-                return;
-            }
-        }
-
+        $idx = \is_callable($remove) ? 0 : 1;
         $this->stack = \array_values(\array_filter(
             $this->stack,
-            static function ($tuple) use ($remove) {
-                return $tuple[0] !== $remove;
+            static function ($tuple) use ($idx, $remove) {
+                return $tuple[$idx] !== $remove;
             }
         ));
     }

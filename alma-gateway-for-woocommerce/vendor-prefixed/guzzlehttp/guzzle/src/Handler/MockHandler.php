@@ -7,6 +7,7 @@ use Alma\Vendor\GuzzleHttp\HandlerStack;
 use Alma\Vendor\GuzzleHttp\Promise as P;
 use Alma\Vendor\GuzzleHttp\Promise\PromiseInterface;
 use Alma\Vendor\GuzzleHttp\TransferStats;
+use Alma\Vendor\GuzzleHttp\Utils;
 use Alma\Vendor\Psr\Http\Message\RequestInterface;
 use Alma\Vendor\Psr\Http\Message\ResponseInterface;
 use Alma\Vendor\Psr\Http\Message\StreamInterface;
@@ -159,7 +160,7 @@ class MockHandler implements \Alma_Gateway_Countable
             ) {
                 $this->queue[] = $value;
             } else {
-                throw new \TypeError('Expected a Response, Promise, Throwable or callable. Found '.\get_debug_type($value));
+                throw new \TypeError('Expected a Response, Promise, Throwable or callable. Found '.Utils::describeType($value));
             }
         }
     }

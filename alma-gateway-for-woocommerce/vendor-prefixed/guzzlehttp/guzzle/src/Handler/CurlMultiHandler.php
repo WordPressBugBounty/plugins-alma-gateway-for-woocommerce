@@ -6,7 +6,6 @@ use Closure;
 use Alma\Vendor\GuzzleHttp\Promise as P;
 use Alma\Vendor\GuzzleHttp\Promise\Promise;
 use Alma\Vendor\GuzzleHttp\Promise\PromiseInterface;
-use Alma\Vendor\GuzzleHttp\TransportSharing;
 use Alma\Vendor\GuzzleHttp\Utils;
 use Alma\Vendor\Psr\Http\Message\RequestInterface;
 
@@ -25,11 +24,6 @@ class CurlMultiHandler
      * @var CurlFactoryInterface
      */
     private $factory;
-
-    /**
-     * @var CurlShareHandleState|null
-     */
-    private $shareHandleState;
 
     /**
      * @var int
@@ -64,32 +58,9 @@ class CurlMultiHandler
     private $_mh;
 
     /**
-     * @var bool
-     */
-    private $executingMulti = false;
-
-    /**
-     * @var array<int, EasyHandle>
-     */
-    private $deferredCancels = [];
-
-    /**
-     * @var string|null Owner signature of the proxy tunnels the multi handle's
-     *                  connection cache may hold
-     */
-    private $proxyTunnelOwner;
-
-    /**
-     * @var bool Guards against multi-handle recreation re-entrancy from
-     *           processMessages (a retried transfer re-invokes the handler)
-     */
-    private $processingMessages = false;
-
-    /**
      * This handler accepts the following options:
      *
      * - handle_factory: An optional factory  used to create curl handles
-     * - transport_sharing: Optional transport sharing mode.
      * - select_timeout: Optional timeout (in seconds) to block before timing
      *   out while selecting curl handles. Defaults to 1 second.
      * - options: An associative array of CURLMOPT_* options and
@@ -97,27 +68,12 @@ class CurlMultiHandler
      */
     public function __construct(array $options = [])
     {
-        CurlShareHandleState::assertNoRequiredSharingCustomFactoryConflict($options, 'CurlMultiHandler');
-        $transportSharing = $options['transport_sharing'] ?? null;
-        $sharingMode = CurlShareHandleState::normalizeMode($transportSharing, 'transport_sharing');
-
-        if (\array_key_exists('handle_factory', $options) && $options['handle_factory'] !== null) {
-            $this->shareHandleState = null;
-            $this->factory = $options['handle_factory'];
-        } else {
-            $this->shareHandleState = $sharingMode !== TransportSharing::NONE
-                ? CurlShareHandleState::fromOption($transportSharing)
-                : null;
-
-            $this->factory = $this->shareHandleState !== null
-                ? new CurlFactory(50, $this->shareHandleState->mode, $this->shareHandleState->handle)
-                : new CurlFactory(50);
-        }
+        $this->factory = $options['handle_factory'] ?? new CurlFactory(50);
 
         if (isset($options['select_timeout'])) {
             $this->selectTimeout = $options['select_timeout'];
         } elseif ($selectTimeout = Utils::getenv('GUZZLE_CURL_SELECT_TIMEOUT')) {
-            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.2', 'The GUZZLE_CURL_SELECT_TIMEOUT environment variable is deprecated; use the "select_timeout" option instead.');
+            @trigger_error('Since guzzlehttp/guzzle 7.2.0: Using environment variable GUZZLE_CURL_SELECT_TIMEOUT is deprecated. Use option "select_timeout" instead.', \Alma_Gateway_E_USER_DEPRECATED);
             $this->selectTimeout = (int) $selectTimeout;
         } else {
             $this->selectTimeout = 1;
@@ -163,20 +119,14 @@ class CurlMultiHandler
     public function __destruct()
     {
         if (isset($this->_mh)) {
-            try {
-                \curl_multi_close($this->_mh);
-            } catch (\Throwable $e) {
-                // Destructors must not throw.
-            } finally {
-                unset($this->_mh);
-            }
+            \curl_multi_close($this->_mh);
+            unset($this->_mh);
         }
     }
 
     public function __invoke(RequestInterface $request, array $options): PromiseInterface
     {
         $easy = $this->factory->create($request, $options);
-        $this->applyProxyTunnelOwnership($easy);
         $id = (int) $easy->handle;
 
         $promise = new Promise(
@@ -189,49 +139,6 @@ class CurlMultiHandler
         $this->addRequest(['easy' => $easy, 'deferred' => $promise]);
 
         return $promise;
-    }
-
-    /**
-     * Isolates the connection cache when the request's proxy tunnel section
-     * differs from the one the multi handle's cache may already hold.
-     */
-    private function applyProxyTunnelOwnership(EasyHandle $easy): void
-    {
-        $signature = $easy->proxyTunnelSignature;
-        if ($signature === null || $signature === $this->proxyTunnelOwner) {
-            return;
-        }
-
-        if ($this->proxyTunnelOwner === null) {
-            // No in-domain transfer has ever run on this multi handle: latch
-            // the owner without destroying pooled direct connections.
-            $this->proxyTunnelOwner = $signature;
-
-            return;
-        }
-
-        if (
-            $this->handles === []
-            && !$this->executingMulti
-            && !$this->processingMessages
-            && $this->deferredCancels === []
-        ) {
-            // Idle: hand the connection cache over by recreating the multi
-            // handle (unsetting re-arms the lazy __get initializer, which
-            // re-applies the CURLMOPT_* options).
-            if (isset($this->_mh)) {
-                \curl_multi_close($this->_mh);
-                unset($this->_mh);
-            }
-            $this->proxyTunnelOwner = $signature;
-
-            return;
-        }
-
-        // Busy: isolate this transfer from the owner's pooled tunnels.
-        // Unqualified curl_setopt so the test bootstrap shadow records it.
-        curl_setopt($easy->handle, \Alma_Gateway_CURLOPT_FRESH_CONNECT, true);
-        curl_setopt($easy->handle, \Alma_Gateway_CURLOPT_FORBID_REUSE, true);
     }
 
     /**
@@ -265,21 +172,10 @@ class CurlMultiHandler
             \usleep(250);
         }
 
-        do {
-            $this->executingMulti = true;
-
-            try {
-                $exec = \curl_multi_exec($this->_mh, $this->active);
-            } finally {
-                $this->executingMulti = false;
-                $this->cleanupDeferredCancels();
-            }
-
+        while (\curl_multi_exec($this->_mh, $this->active) === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
             // Prevent busy looping for slow HTTP requests.
-            if ($exec === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
-                \curl_multi_select($this->_mh, $this->selectTimeout);
-            }
-        } while ($exec === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM);
+            \curl_multi_select($this->_mh, $this->selectTimeout);
+        }
 
         $this->processMessages();
     }
@@ -289,16 +185,7 @@ class CurlMultiHandler
      */
     private function tickInQueue(): void
     {
-        $this->executingMulti = true;
-
-        try {
-            $exec = \curl_multi_exec($this->_mh, $this->active);
-        } finally {
-            $this->executingMulti = false;
-            $this->cleanupDeferredCancels();
-        }
-
-        if ($exec === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
+        if (\curl_multi_exec($this->_mh, $this->active) === \Alma_Gateway_CURLM_CALL_MULTI_PERFORM) {
             \curl_multi_select($this->_mh, 0);
             P\Utils::queue()->add(Closure::fromCallable([$this, 'tickInQueue']));
         }
@@ -342,7 +229,7 @@ class CurlMultiHandler
     private function cancel($id): bool
     {
         if (!is_int($id)) {
-            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.4', 'Not passing an int to %s::%s() is deprecated and will cause an error in 8.0.', __CLASS__, __FUNCTION__);
+            alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.4', 'Not passing an integer to %s::%s() is deprecated and will cause an error in 8.0.', __CLASS__, __FUNCTION__);
         }
 
         // Cannot cancel if it has been processed.
@@ -350,87 +237,38 @@ class CurlMultiHandler
             return false;
         }
 
-        $easy = $this->handles[$id]['easy'];
+        $handle = $this->handles[$id]['easy']->handle;
         unset($this->delays[$id], $this->handles[$id]);
-
-        if ($this->executingMulti) {
-            $this->deferredCancels[$id] = $easy;
-
-            return true;
-        }
-
-        $this->cleanupCancelledHandle($easy);
-
-        return true;
-    }
-
-    private function cleanupDeferredCancels(): void
-    {
-        if ($this->deferredCancels === []) {
-            return;
-        }
-
-        $entries = $this->deferredCancels;
-        $this->deferredCancels = [];
-
-        foreach ($entries as $easy) {
-            $this->cleanupCancelledHandle($easy);
-        }
-    }
-
-    private function cleanupCancelledHandle(EasyHandle $easy): void
-    {
-        $handle = $easy->handle;
         \curl_multi_remove_handle($this->_mh, $handle);
 
         if (PHP_VERSION_ID < 80000) {
             \curl_close($handle);
         }
+
+        return true;
     }
 
     private function processMessages(): void
     {
-        // CurlFactory::finish can retry a transfer by re-invoking this handler
-        // from inside this loop; the guard keeps that re-entry from recreating
-        // the multi handle mid-iteration (see applyProxyTunnelOwnership).
-        $this->processingMessages = true;
-
-        try {
-            while ($done = \curl_multi_info_read($this->_mh)) {
-                if ($done['msg'] !== \Alma_Gateway_CURLMSG_DONE) {
-                    // if it's not done, then it would be premature to remove the handle. ref https://github.com/guzzle/guzzle/pull/2892#issuecomment-945150216
-                    continue;
-                }
-                if (!isset($done['handle'])) {
-                    // Work around a PHP issue where cancelled transfers may omit the handle.
-                    // Remove this once we no longer support PHP versions before the fix in
-                    // https://github.com/php/php-src/pull/16302.
-                    continue;
-                }
-                $id = (int) $done['handle'];
-                \curl_multi_remove_handle($this->_mh, $done['handle']);
-
-                if (!isset($this->handles[$id])) {
-                    // Probably was cancelled.
-                    continue;
-                }
-
-                $entry = $this->handles[$id];
-                unset($this->handles[$id], $this->delays[$id]);
-                $entry['easy']->errno = $done['result'];
-
-                try {
-                    $result = CurlFactory::finish($this, $entry['easy'], $this->factory);
-                } catch (\Throwable $e) {
-                    $entry['deferred']->reject($e);
-
-                    continue;
-                }
-
-                $entry['deferred']->resolve($result);
+        while ($done = \curl_multi_info_read($this->_mh)) {
+            if ($done['msg'] !== \Alma_Gateway_CURLMSG_DONE) {
+                // if it's not done, then it would be premature to remove the handle. ref https://github.com/guzzle/guzzle/pull/2892#issuecomment-945150216
+                continue;
             }
-        } finally {
-            $this->processingMessages = false;
+            $id = (int) $done['handle'];
+            \curl_multi_remove_handle($this->_mh, $done['handle']);
+
+            if (!isset($this->handles[$id])) {
+                // Probably was cancelled.
+                continue;
+            }
+
+            $entry = $this->handles[$id];
+            unset($this->handles[$id], $this->delays[$id]);
+            $entry['easy']->errno = $done['result'];
+            $entry['deferred']->resolve(
+                CurlFactory::finish($this, $entry['easy'], $this->factory)
+            );
         }
     }
 
