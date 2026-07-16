@@ -6,7 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'f1356847d256a93f7928631f13c85add' => $vendorDir . '/ralouphie/getallheaders/src/getallheaders.php',
     'e3811edf620df906119dde7e62fb7164' => $vendorDir . '/symfony/deprecation-contracts/function.php',
+    '1ca077f53716943ed824d66c26b73e2c' => $vendorDir . '/symfony/polyfill-php80/bootstrap.php',
+    'f1356847d256a93f7928631f13c85add' => $vendorDir . '/ralouphie/getallheaders/src/getallheaders.php',
     '6672bcf5979dfbf039eef83608d74702' => $vendorDir . '/guzzlehttp/guzzle/src/functions_include.php',
 );

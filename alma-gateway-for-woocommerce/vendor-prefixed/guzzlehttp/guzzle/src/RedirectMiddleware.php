@@ -3,6 +3,7 @@
 namespace Alma\Vendor\GuzzleHttp;
 
 use Alma\Vendor\GuzzleHttp\Exception\BadResponseException;
+use Alma\Vendor\GuzzleHttp\Exception\RequestException;
 use Alma\Vendor\GuzzleHttp\Exception\TooManyRedirectsException;
 use Alma\Vendor\GuzzleHttp\Promise\PromiseInterface;
 use Alma\Vendor\Psr\Http\Message\RequestInterface;
@@ -73,6 +74,9 @@ class RedirectMiddleware
         if (isset($options['allow_redirects']['on_redirect'])) {
             $options['allow_redirects']['on_redirect']($request, $response, $nextRequest->getUri());
         }
+        // The caller's delay applies once, before the initial request, not
+        // before each followed redirect.
+        unset($options['delay']);
         $promise = $this($nextRequest, $options);
         // Add headers to be able to track history of redirects.
         if (!empty($options['allow_redirects']['track_redirects'])) {
@@ -120,18 +124,26 @@ class RedirectMiddleware
         // would do.
         $statusCode = $response->getStatusCode();
         if ($statusCode == 303 || $statusCode <= 302 && !$options['allow_redirects']['strict']) {
-            $safeMethods = ['GET', 'HEAD', 'OPTIONS'];
             $requestMethod = $request->getMethod();
-            $modify['method'] = in_array($requestMethod, $safeMethods) ? $requestMethod : 'GET';
-            $modify['body'] = '';
+            if ($requestMethod !== 'QUERY' || !\in_array($statusCode, [301, 302], true)) {
+                $modify['method'] = \in_array($requestMethod, ['GET', 'HEAD', 'OPTIONS'], true) ? $requestMethod : 'GET';
+                $modify['body'] = '';
+            }
         }
         $uri = self::redirectUri($request, $response, $protocols);
-        if (isset($options['idn_conversion']) && $options['idn_conversion'] !== false) {
-            $idnOptions = $options['idn_conversion'] === true ? \IDNA_DEFAULT : $options['idn_conversion'];
+        $idnOptions = Utils::normalizeIdnConversionOption($options['idn_conversion'] ?? null);
+        if ($idnOptions !== null) {
             $uri = Utils::idnUriConvert($uri, $idnOptions);
         }
         $modify['uri'] = $uri;
-        \Alma\Vendor\GuzzleHttp\Psr7\Message::rewindBody($request);
+        // The body only needs to be rewound when the next request reuses it.
+        if (!isset($modify['body'])) {
+            try {
+                \Alma\Vendor\GuzzleHttp\Psr7\Message::rewindBody($request);
+            } catch (\RuntimeException $e) {
+                throw new RequestException('Redirect failed because the request body could not be rewound: ' . $e->getMessage(), $request, $response, $e);
+            }
+        }
         // Add the Referer header if it is told to do so and only
         // add the header if we are not redirecting from https to http.
         if ($options['allow_redirects']['referer'] && $modify['uri']->getScheme() === $request->getUri()->getScheme()) {

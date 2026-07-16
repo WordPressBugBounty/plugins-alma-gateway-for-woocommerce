@@ -48,7 +48,7 @@
   "scripts": {
     "phpcs": "vendor/bin/phpcs --standard=phpcs.xml .",
     "phpcbf": "vendor/bin/phpcbf --standard=phpcs.xml .",
-    "php-compatibility": "vendor/bin/phpcs -p src --standard=PHPCompatibility -s --runtime-set testVersion 7.4-8.4 --ignore=\\*/vendor/\\*"
+    "php-compatibility": "vendor/bin/phpcs -p src --standard=PHPCompatibility -s --runtime-set testVersion 7.4- --ignore=\\*/vendor/\\*"
   },
   "config": {
     "sort-packages": true,
