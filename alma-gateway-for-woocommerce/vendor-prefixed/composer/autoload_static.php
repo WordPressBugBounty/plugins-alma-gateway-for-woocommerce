@@ -4,7 +4,7 @@
 
 namespace Alma\Vendor\Composer\Autoload;
 
-class ComposerStaticInit5fd5564a422182a035ec0eac6ae23f26
+class ComposerStaticInit719dc9da6d465348f4920b15dbc57d54
 {
     public static $files = array (
         'e3811edf620df906119dde7e62fb7164' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -396,6 +396,7 @@ class ComposerStaticInit5fd5564a422182a035ec0eac6ae23f26
         'Alma\\Vendor\\GuzzleHttp\\Handler\\CurlVersion' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlVersion.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
+        'Alma\\Vendor\\GuzzleHttp\\Handler\\HostValidator' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HostValidator.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/MockHandler.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\Proxy' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/Proxy.php',
         'Alma\\Vendor\\GuzzleHttp\\Handler\\ProxyEnvironment' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/ProxyEnvironment.php',
@@ -502,9 +503,9 @@ class ComposerStaticInit5fd5564a422182a035ec0eac6ae23f26
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5fd5564a422182a035ec0eac6ae23f26::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5fd5564a422182a035ec0eac6ae23f26::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit5fd5564a422182a035ec0eac6ae23f26::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit719dc9da6d465348f4920b15dbc57d54::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit719dc9da6d465348f4920b15dbc57d54::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit719dc9da6d465348f4920b15dbc57d54::$classMap;
 
         }, null, ClassLoader::class);
     }

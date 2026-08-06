@@ -2,17 +2,17 @@
     "packages": {
         "0": {
             "name": "alma/alma-php-client",
-            "version": "3.0.1",
-            "version_normalized": "3.0.1.0",
+            "version": "3.0.2",
+            "version_normalized": "3.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/alma/alma-php-client.git",
-                "reference": "5b328032c530f45ff5d65d63557f32c87b639b9d"
+                "reference": "dcb5eb2d67b485b6ae4ddd59b19917b4e0dda922"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/alma/alma-php-client/zipball/5b328032c530f45ff5d65d63557f32c87b639b9d",
-                "reference": "5b328032c530f45ff5d65d63557f32c87b639b9d",
+                "url": "https://api.github.com/repos/alma/alma-php-client/zipball/dcb5eb2d67b485b6ae4ddd59b19917b4e0dda922",
+                "reference": "dcb5eb2d67b485b6ae4ddd59b19917b4e0dda922",
                 "shasum": ""
             },
             "require": {
@@ -34,7 +34,7 @@
                 "roave/security-advisories": "@dev",
                 "squizlabs/php_codesniffer": "^3.3"
             },
-            "time": "2026-05-11T08:32:55+00:00",
+            "time": "2026-08-06T13:32:12+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -56,7 +56,7 @@
             "description": "PHP API client for the Alma payments API",
             "support": {
                 "issues": "https://github.com/alma/alma-php-client/issues",
-                "source": "https://github.com/alma/alma-php-client/tree/v3.0.1"
+                "source": "https://github.com/alma/alma-php-client/tree/v3.0.2"
             },
             "install-path": "../alma/alma-php-client"
         },
@@ -67,18 +67,18 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "a29e961d0e1d8fc4bb7d148dcb188570ad9ecd28"
+                "reference": "ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/a29e961d0e1d8fc4bb7d148dcb188570ad9ecd28",
-                "reference": "a29e961d0e1d8fc4bb7d148dcb188570ad9ecd28",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc",
+                "reference": "ae311b8f045ea93ce7b1c9cdb7cec06c53f944bc",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "guzzlehttp/promises": "^2.5.1",
-                "guzzlehttp/psr7": "^2.13@dev",
+                "guzzlehttp/promises": "^2.5.2",
+                "guzzlehttp/psr7": "^2.13",
                 "php": "^7.2.5 || ^8.0",
                 "psr/http-client": "^1.0",
                 "symfony/deprecation-contracts": "^2.5 || ^3.0",
@@ -91,7 +91,7 @@
                 "bamarni/composer-bin-plugin": "^1.8.2",
                 "ext-curl": "*",
                 "guzzle/client-integration-tests": "3.0.3",
-                "guzzlehttp/test-server": "^0.6",
+                "guzzlehttp/test-server": "^0.7",
                 "php-http/message-factory": "^1.1",
                 "phpunit/phpunit": "^8.5.52 || ^9.6.34",
                 "psr/log": "^1.1 || ^2.0 || ^3.0"
@@ -101,8 +101,7 @@
                 "ext-intl": "Required for Internationalized Domain Name (IDN) support",
                 "psr/log": "Required for using the Log middleware"
             },
-            "time": "2026-07-14T18:15:36+00:00",
-            "default-branch": true,
+            "time": "2026-08-05T19:48:21+00:00",
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -199,12 +198,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "9ad1e4fc607446a055b95870c7f668e93b5cff29"
+                "reference": "2823687acff28b2dbe67b2508a6b300e2c3fa4ce"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/9ad1e4fc607446a055b95870c7f668e93b5cff29",
-                "reference": "9ad1e4fc607446a055b95870c7f668e93b5cff29",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/2823687acff28b2dbe67b2508a6b300e2c3fa4ce",
+                "reference": "2823687acff28b2dbe67b2508a6b300e2c3fa4ce",
                 "shasum": ""
             },
             "require": {
@@ -215,8 +214,7 @@
                 "bamarni/composer-bin-plugin": "^1.8.2",
                 "phpunit/phpunit": "^8.5.52 || ^9.6.34"
             },
-            "time": "2026-07-08T15:48:39+00:00",
-            "default-branch": true,
+            "time": "2026-08-05T19:30:54+00:00",
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -287,12 +285,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "a1372eadd97b37d01c282217b6be5cce46a6c0c7"
+                "reference": "5b1264e6076b7cf088a6eabb72d7f6e1f67e58a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/a1372eadd97b37d01c282217b6be5cce46a6c0c7",
-                "reference": "a1372eadd97b37d01c282217b6be5cce46a6c0c7",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/5b1264e6076b7cf088a6eabb72d7f6e1f67e58a5",
+                "reference": "5b1264e6076b7cf088a6eabb72d7f6e1f67e58a5",
                 "shasum": ""
             },
             "require": {
@@ -316,8 +314,7 @@
             "suggest": {
                 "laminas/laminas-httphandlerrunner": "Emit PSR-7 responses"
             },
-            "time": "2026-07-14T12:06:49+00:00",
-            "default-branch": true,
+            "time": "2026-07-26T21:49:15+00:00",
             "type": "library",
             "extra": {
                 "bamarni-bin": {

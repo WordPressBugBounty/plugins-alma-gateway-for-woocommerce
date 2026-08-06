@@ -119,6 +119,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
      */
     public function __call($method, $args)
     {
+        alma_gateway_trigger_deprecation('guzzlehttp/guzzle', '7.1', '%s::%s() is deprecated and will be removed in 8.0.', __CLASS__, __FUNCTION__);
         if (\count($args) < 1) {
             throw new InvalidArgumentException('Magic request methods require a URI and optional options array');
         }
@@ -139,7 +140,7 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
     {
         // Merge the base URI into the request URI if needed.
         $options = $this->prepareDefaults($options);
-        return $this->transfer($request->withUri($this->buildUri($request->getUri(), $options), $request->hasHeader('Host')), $options);
+        return $this->transfer($request->withUri($this->buildUri($request->getUri(), $options), self::shouldPreserveHost($request)), $options);
     }
     /**
      * Send an HTTP request.
@@ -256,6 +257,26 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
             $uri = $uri->withScheme('http');
         }
         return $uri;
+    }
+    /**
+     * Whether to preserve an existing Host header when the URI changes.
+     *
+     * A header matching the current URI carries no explicit override and is
+     * regenerated after base URI resolution or IDN conversion. Other values
+     * are preserved as deliberate overrides, as PSR-7 requires.
+     */
+    private static function shouldPreserveHost(RequestInterface $request): bool
+    {
+        if (!$request->hasHeader('Host')) {
+            return false;
+        }
+        $uri = $request->getUri();
+        $host = $uri->getHost();
+        $port = $uri->getPort();
+        if ($port !== null) {
+            $host .= ':' . $port;
+        }
+        return $host !== $request->getHeaderLine('Host');
     }
     /**
      * Configures the default options for a client.
@@ -871,7 +892,12 @@ class Client implements ClientInterface, \Alma\Vendor\Psr\Http\Client\ClientInte
             unset($options['multipart']);
         }
         if (isset($options['json'])) {
-            $options['body'] = Utils::jsonEncode($options['json']);
+            $json = \json_encode($options['json']);
+            if (\JSON_ERROR_NONE !== \json_last_error()) {
+                throw new InvalidArgumentException('json_encode error: ' . \json_last_error_msg());
+            }
+            /** @var non-empty-string $json */
+            $options['body'] = $json;
             unset($options['json']);
             // Ensure that we don't have the header in different case and set the new value.
             $options['_conditional'] = \Alma\Vendor\GuzzleHttp\Psr7\Utils::caselessRemove(['Content-Type'], $options['_conditional']);

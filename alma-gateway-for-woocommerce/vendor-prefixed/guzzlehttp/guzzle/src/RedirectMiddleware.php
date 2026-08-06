@@ -128,6 +128,7 @@ class RedirectMiddleware
             if ($requestMethod !== 'QUERY' || !\in_array($statusCode, [301, 302], true)) {
                 $modify['method'] = \in_array($requestMethod, ['GET', 'HEAD', 'OPTIONS'], true) ? $requestMethod : 'GET';
                 $modify['body'] = '';
+                $modify['remove_headers'] = ['Content-Length', 'Transfer-Encoding'];
             }
         }
         $uri = self::redirectUri($request, $response, $protocols);
@@ -147,7 +148,7 @@ class RedirectMiddleware
         // Add the Referer header if it is told to do so and only
         // add the header if we are not redirecting from https to http.
         if ($options['allow_redirects']['referer'] && $modify['uri']->getScheme() === $request->getUri()->getScheme()) {
-            $uri = $request->getUri()->withUserInfo('');
+            $uri = $request->getUri()->withUserInfo('')->withFragment('');
             $modify['set_headers']['Referer'] = (string) $uri;
         } else {
             $modify['remove_headers'][] = 'Referer';
